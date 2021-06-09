@@ -551,6 +551,12 @@ const dailyCaloriesExpectedResponse = [
     activityCalories: "3314",
     deficit: "-1090",
   },
+  {
+    activityCalories: "5",
+    calories: "0",
+    dateTime: "2021-06-02",
+    deficit: "-5",
+  },
 ];
 
 export { dailyCaloriesExpectedResponse };
