@@ -38,18 +38,20 @@ export const getCalories = async (
     ({ value }: FitbitData) => parseInt(value) !== 0
   );
 
-  const calories = caloriesResponse.map(({ dateTime, value: calories }) => {
-    // Find the activityCaloriesResponse entry for the dateTime
-    const { value: activityCalories } = activityCaloriesResponse.find(
-      (entry) => entry.dateTime === dateTime
-    );
-    return {
-      dateTime,
-      calories,
-      activityCalories: activityCalories,
-      deficit: (parseInt(calories) - parseInt(activityCalories)).toString(),
-    };
-  });
+  const calories = activityCaloriesResponse.map(
+    ({ dateTime, value: activityCalories }) => {
+      // Find the caloriesResponse entry for the dateTime
+      const caloriesIn =
+        caloriesResponse.find((entry) => entry.dateTime === dateTime)?.value ||
+        "0";
+      return {
+        dateTime,
+        calories: caloriesIn || "0",
+        activityCalories: activityCalories,
+        deficit: (parseInt(caloriesIn) - parseInt(activityCalories)).toString(),
+      };
+    }
+  );
 
   return calories;
 };
