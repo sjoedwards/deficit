@@ -72,7 +72,7 @@ const getWeeklyCalories = async (
       )
     )
     .map((weeklyCalories) => {
-      return {
+      const averageCalories = {
         // Reduce each week to a single value
         calories: (
           weeklyCalories.reduce(
@@ -95,7 +95,16 @@ const getWeeklyCalories = async (
             .format("YYYY-MM-DD");
         })(),
       };
+
+      return {
+        ...averageCalories,
+        deficit: (
+          parseInt(averageCalories.calories) -
+          parseInt(averageCalories.activityCalories)
+        ).toString(),
+      };
     })
+    // Filter results from this week
     .filter(
       (week) =>
         week.weekEnd !==
