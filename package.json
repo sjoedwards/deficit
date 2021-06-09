@@ -1,5 +1,5 @@
 {
-  "name": "fitbit-sync",
+  "name": "@sjoedwards/deficit",
   "version": "1.0.0",
   "main": "index.js",
   "devDependencies": {
@@ -32,8 +32,7 @@
     "build": "tsc",
     "start": "node build/src/index.js",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
-    "lint:fix": "yarn run lint --fix",
-    "deploy": "heroku git:remote -a fitdash-sync && cd .. && git subtree push --prefix fitbit-sync heroku master"
+    "lint:fix": "yarn run lint --fix"
   },
   "jest": {
     "preset": "ts-jest",
