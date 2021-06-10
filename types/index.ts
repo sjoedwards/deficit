@@ -4,6 +4,24 @@ export interface APIFitbitCaloriesData {
   activityCalories: string;
   deficit: string;
 }
+
+export interface APIFitbitWeightData {
+  bmi: number;
+  date: string;
+  logId: number;
+  time: string;
+  weight: number;
+  source: string;
+}
+export interface FitbitDailyWeightData {
+  dateTime: string;
+  weight: string;
+}
+
+export interface FitbitWeeklyWeightData {
+  weekEnd: string;
+  weight: string;
+}
 export interface FitbitData {
   value: string;
   dateTime: string;
@@ -28,9 +46,4 @@ export interface FitbitActivityData {
   originalStartTime: string;
   activeDuration: string;
   activityName: string;
-}
-
-export interface FitbitWeightData {
-  weekEnd: string;
-  weight: string;
 }

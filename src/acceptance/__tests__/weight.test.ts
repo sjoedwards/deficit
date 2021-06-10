@@ -1,6 +1,7 @@
 import request from "supertest";
 import { app } from "../../app";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
+import { dailyWeightExpectedResponse } from "../expected-responses/weight/daily";
 import { weeklyWeightExpectedResponse } from "../expected-responses/weight/weekly";
 import { createMockJWT } from "../tools/create-mock-jwt";
 
@@ -20,22 +21,22 @@ beforeEach(() => {
   weightMock().mockDefault();
 });
 
-describe("weight Route", () => {
+describe("Weight Route", () => {
   it("should return the correct weight information for a weekly resolution", async () => {
     const weeklyResponse = await request(app.callback())
-      .get("/weight")
+      .get("/weight/weekly")
       .set("Cookie", `accessToken=${createMockJWT()}`)
       .send()
       .expect(200);
     expect(weeklyResponse.body).toEqual(weeklyWeightExpectedResponse);
   });
 
-  // it("should return the correct weight information for a daily resolution", async () => {
-  //   const dailyResponse = await request(app.callback())
-  //     .get("/calories/daily")
-  //     .set("Cookie", `accessToken=${createMockJWT()}`)
-  //     .send()
-  //     .expect(200);
-  //   expect(dailyResponse.body).toEqual(dailyWeightExpectedResponse);
-  // });
+  it("should return the correct weight information for a daily resolution", async () => {
+    const dailyResponse = await request(app.callback())
+      .get("/weight/daily")
+      .set("Cookie", `accessToken=${createMockJWT()}`)
+      .send()
+      .expect(200);
+    expect(dailyResponse.body).toEqual(dailyWeightExpectedResponse);
+  });
 });

@@ -13,14 +13,16 @@ const weightMock = (): Mock => {
   return {
     get: () => mock,
     mockDefault: () => {
-      const urlWeightMonthly = new RegExp(
-        "https://api.fitbit.com/1/user/-/body/weight/date/today/3m.json"
-      );
-      mock.onGet(urlWeightMonthly).reply(200, {
-        "body-weight": weightApiData["body-weight"],
+      Object.entries(weightApiData).forEach(([monthToMock, mockData]) => {
+        const urlWeightMonthly = new RegExp(
+          `https://api.fitbit.com/1/user/-/body/log/weight/date/${monthToMock}/1m.json`
+        );
+        mock.onGet(urlWeightMonthly).reply(200, {
+          weight: mockData,
+        });
       });
       const fitbitApiweight = new RegExp(
-        "https://api.fitbit.com/1/user/-/body/weight"
+        "https://api.fitbit.com/1/user/-/body/log/weight"
       );
       mock.onGet(fitbitApiweight).reply(500);
     },
