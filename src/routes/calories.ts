@@ -1,8 +1,9 @@
 import {
+  ResolutionNames,
   APIFitbitCaloriesData,
   FitbitData,
   FitbitCaloriesData,
-} from "../../types";
+} from "./../../types/index";
 
 import { Context } from "koa";
 import axios from "axios";
@@ -114,7 +115,16 @@ const getWeeklyCalories = async (
   return weeklyCalories;
 };
 
-caloriesRouter.get("/calories/:resolution", async (ctx: Context) => {
+type ResolutionType<T> = T extends "daily"
+  ? APIFitbitCaloriesData[]
+  : T extends "weekly"
+  ? FitbitCaloriesData[]
+  : never;
+
+export const caloriesService = async <T extends ResolutionNames>(
+  resolution: T,
+  ctx: Context
+): Promise<ResolutionType<T>> => {
   let calories: Array<APIFitbitCaloriesData>;
   const cachedCalories: Array<APIFitbitCaloriesData> = cache.get(
     "calories",
@@ -131,8 +141,6 @@ caloriesRouter.get("/calories/:resolution", async (ctx: Context) => {
     cache.set("calories", calories, ctx);
   }
 
-  const resolution: string = ctx.params.resolution || "weekly";
-
   const resolutionsMap = {
     weekly: async (
       calories: Array<APIFitbitCaloriesData>
@@ -142,13 +150,19 @@ caloriesRouter.get("/calories/:resolution", async (ctx: Context) => {
     ): Array<APIFitbitCaloriesData> => calories,
   };
 
+  // Fix these types
   const [, getCaloriesMethod] = Object.entries(resolutionsMap).find(
     ([key]) => key === resolution
   );
 
-  const caloriesData = await getCaloriesMethod(calories);
+  const caloriesData = (await getCaloriesMethod(calories)) as ResolutionType<T>;
 
-  ctx.body = caloriesData;
+  return caloriesData;
+};
+
+caloriesRouter.get("/calories/:resolution", async (ctx: Context) => {
+  const resolution: ResolutionNames = ctx.params.resolution || "weekly";
+  ctx.body = await caloriesService(resolution, ctx);
 });
 
 export { caloriesRouter };

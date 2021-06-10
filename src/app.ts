@@ -11,6 +11,7 @@ import { runRouter } from "./routes/runs";
 import { macrosRouter } from "./routes/macros";
 import { caloriesRouter } from "./routes/calories";
 import { deficitRouter } from "./routes/deficit";
+
 config({ path: ".env" });
 
 app

@@ -58,6 +58,7 @@
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "moment": "^2.25.3",
-    "node-cache": "^5.1.0"
+    "node-cache": "^5.1.0",
+    "simple-statistics": "^7.7.0"
   }
 }

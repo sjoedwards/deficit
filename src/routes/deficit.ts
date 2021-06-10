@@ -5,6 +5,7 @@ import { Context } from "koa";
 import moment from "moment";
 import Router from "@koa/router";
 import { cache } from "../cache";
+import { predictService } from "../services/predict";
 
 const deficitRouter = new Router();
 
@@ -54,14 +55,24 @@ deficitRouter.get("/deficit", async (ctx: Context) => {
   const deficitsCurrentMonth = caloriesCurrentMonth.map(
     ({ dateTime, deficit }) => ({ dateTime, deficit })
   );
-  const averageCaloriesForCurrentMonth = getAverageDeficit(
-    caloriesCurrentMonth
-  );
+  const averageDeficitCurrentMonth = getAverageDeficit(caloriesCurrentMonth);
+
+  const { weightDiff, rSquaredValue } =
+    (await predictService(ctx, averageDeficitCurrentMonth)) || {};
+  const weightDiffFixed = weightDiff.toFixed(3);
 
   ctx.body = {
-    averageDeficitCurrentMonth: averageCaloriesForCurrentMonth,
+    message: `At your daily deficit of ${averageDeficitCurrentMonth} calories (averaged over days this month), you are predicted to ${
+      weightDiff >= 0 ? "gain" : "lose"
+    } ${Math.abs(
+      parseFloat(weightDiffFixed)
+    )} kilograms per week, based off of your historic metabolic data`,
+    averageDeficitCurrentMonth,
     // TODO replace with frontend functionality
-    goals: { "0": "-851", "0.25": "-1301", "0.5": "-1751" },
+    predictedWeeklyWeightDiff: {
+      weightDiffKilos: weightDiffFixed,
+      rSquaredValue: rSquaredValue.toFixed(3),
+    },
     deficits: deficitsCurrentMonth,
   };
 });
