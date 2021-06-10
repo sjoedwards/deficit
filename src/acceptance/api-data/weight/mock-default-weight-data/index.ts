@@ -7,7 +7,7 @@ interface Mock {
   mockDefault: () => void;
 }
 
-const weightMock = (mock: MockAdapter): Mock => {
+const weightMock = (mock?: MockAdapter): Mock => {
   const _mock = mock || new MockAdapter(axios);
 
   return {

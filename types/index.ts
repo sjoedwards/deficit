@@ -47,3 +47,5 @@ export interface FitbitActivityData {
   activeDuration: string;
   activityName: string;
 }
+
+export type ResolutionNames = "daily" | "weekly";
