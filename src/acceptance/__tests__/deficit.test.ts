@@ -1,46 +1,27 @@
-import axios from "axios";
-import MockAdapter from "axios-mock-adapter";
 import request from "supertest";
 import { app } from "../../app";
-import { caloriesApiData } from "../api-data/calories";
+import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
+import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import { deficitExpectedResponse } from "../expected-responses/deficit";
 import { createMockJWT } from "../tools/create-mock-jwt";
 
 let realDateNow: () => number;
 beforeEach(() => {
   realDateNow = Date.now.bind(global.Date);
-  // stub date to Wednesday, 2 June 2021 12:00:00
-  global.Date.now = jest.fn().mockReturnValue(1622635200000);
+  // stub date to 2021-05-29, 12:00:00
+  global.Date.now = jest.fn().mockReturnValue(1622588225000);
+});
+const calMockservice = calorieMock();
+const weightMockService = weightMock(calMockservice.get());
+// This sets the mock adapter on the default instance
+beforeEach(() => {
+  calMockservice.mockDefault();
+  weightMockService.mockDefault();
 });
 
 afterEach(() => {
+  calMockservice.get().resetHistory();
   global.Date.now = realDateNow;
-});
-
-// This sets the mock adapter on the default instance
-const mock = new MockAdapter(axios);
-beforeEach(() => {
-  const urlCalsInMonthly = new RegExp(
-    "https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/3m.json"
-  );
-  const urlActivitiesCalsMonthly = new RegExp(
-    "https://api.fitbit.com/1/user/-/activities/calories/date/today/3m.json"
-  );
-  mock.onGet(urlCalsInMonthly).reply(200, {
-    "foods-log-caloriesIn": caloriesApiData["foods-log-caloriesIn"],
-  });
-  mock.onGet(urlActivitiesCalsMonthly).reply(200, {
-    "activities-calories": caloriesApiData["activities-calories"],
-  });
-
-  const fitbitApiCalories = new RegExp(
-    "https://api.fitbit.com/1/user/-/foods/log/caloriesIn/"
-  );
-  const fitbitApiActivities = new RegExp(
-    "https://api.fitbit.com/1/user/-/activities/"
-  );
-  mock.onGet(fitbitApiCalories).reply(500);
-  mock.onGet(fitbitApiActivities).reply(500);
 });
 
 describe("Deficit Route", () => {

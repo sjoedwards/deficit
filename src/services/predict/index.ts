@@ -11,6 +11,7 @@ import {
   linearRegressionLine,
   rSquared,
 } from "simple-statistics";
+import moment from "moment";
 
 const predictService = async (
   ctx: Context,
@@ -30,18 +31,24 @@ const predictService = async (
     })
     .filter(({ weightDiff }) => weightDiff);
 
-  const combinedWeeklyValues = weeklyWeightWithDiff.map(
-    ({ weekEnd, weightDiff }) => {
-      // Find the caloriesResponse entry for the dateTime
-      const deficit = weeklyCalories.find((entry) => entry.weekEnd === weekEnd)
-        ?.deficit;
+  const getCombinedWeeklyValues = (deficitWeeksAgo: number) =>
+    weeklyWeightWithDiff
+      .map(({ weekEnd, weightDiff }) => {
+        // Find the caloriesResponse entry for the dateTime
+        const deficit = weeklyCalories.find(
+          (entry) =>
+            entry.weekEnd ===
+            moment(weekEnd)
+              .subtract(deficitWeeksAgo, "week")
+              .format("YYYY-MM-DD")
+        )?.deficit;
 
-      return {
-        weightDiff,
-        deficit,
-      };
-    }
-  );
+        return {
+          weightDiff,
+          deficit,
+        };
+      })
+      .filter(({ deficit }) => typeof deficit !== "undefined");
 
   const getLinearRegressionInformation = (
     combinedWeeklyValues: Array<DeficitGoalData>
@@ -79,7 +86,7 @@ const predictService = async (
   };
 
   return predictWeeklyWeightDiffForDeficit(
-    combinedWeeklyValues,
+    getCombinedWeeklyValues(1),
     parseInt(deficit)
   );
 };
