@@ -1,13 +1,19 @@
 import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
+import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import request from "supertest";
 import { app } from "../../app";
-import jwt from "jsonwebtoken";
 import { cache } from "../../cache";
 import { createMockJWT } from "../tools/create-mock-jwt";
 
-const getWeeklyResponse = async (subject?: string) =>
+const getWeeklyResponse = async ({
+  route,
+  subject,
+}: {
+  route?: string;
+  subject?: string;
+} = {}) =>
   await request(app.callback())
-    .get("/calories/weekly")
+    .get(`/${route}/weekly`)
     .set("Cookie", `accessToken=${createMockJWT(subject)}`)
     .send();
 
@@ -22,60 +28,64 @@ beforeEach(() => {
   cacheSpyGet = jest.spyOn(cache, "get");
 });
 
-const calMock = calorieMock();
+const calMockservice = calorieMock();
+const weightMockService = weightMock(calMockservice.get());
 // This sets the mock adapter on the default instance
 beforeEach(() => {
-  calMock.mockDefault();
+  calMockservice.mockDefault();
+  weightMockService.mockDefault();
 });
 
 afterEach(() => {
-  calMock.get().resetHistory();
+  calMockservice.get().resetHistory();
   global.Date.now = realDateNow;
   cacheSpySet.mockClear();
   cacheSpyGet.mockClear();
   cache.getInstance().flushAll();
 });
-
-describe("Calories: cache", () => {
+describe.each([
+  ["calories", 2, 1, 1],
+  ["weight", 3, 1, 1],
+])("Caching for %s route", (route, apiCalls, cacheGetCalls, cacheSetCalls) => {
   it("should return cached data if request made a second time for the same user", async () => {
-    const response1 = await await getWeeklyResponse();
+    const response1 = await getWeeklyResponse({ route });
     expect(response1.status).toEqual(200);
-    expect(calMock.get().history.get).toHaveLength(2);
-    expect(cacheSpySet).toHaveBeenCalledTimes(1);
-    expect(cacheSpySet).toHaveLastReturnedWith("calories-subject1");
+    expect(calMockservice.get().history.get).toHaveLength(apiCalls);
+    expect(cacheSpySet).toHaveBeenCalledTimes(cacheSetCalls);
+    expect(cacheSpySet).toHaveLastReturnedWith(`${route}-subject1`);
     expect(cacheSpyGet).toHaveBeenCalledTimes(1);
 
-    const response2 = await await getWeeklyResponse();
+    const response2 = await getWeeklyResponse({ route });
     expect(response2.status).toEqual(200);
-    expect(calMock.get().history.get).toHaveLength(2);
+    expect(calMockservice.get().history.get).toHaveLength(apiCalls);
     expect(cacheSpySet).toHaveBeenCalledTimes(1);
-    expect(cacheSpySet).toHaveLastReturnedWith("calories-subject1");
+    expect(cacheSpySet).toHaveLastReturnedWith(`${route}-subject1`);
     expect(cacheSpyGet).toHaveBeenCalledTimes(2);
-    expect(cache.getInstance().has("calories-subject1")).toEqual(true);
+    expect(cache.getInstance().has(`${route}-subject1`)).toEqual(true);
     expect(cache.getInstance().keys()).toHaveLength(1);
     expect(response1.body).toEqual(response2.body);
   });
 
-  it("should return cached data if request made a second time for the same user", async () => {
-    const response1 = await getWeeklyResponse();
+  it("should return non cached data if a request made for a second user", async () => {
+    const response1 = await getWeeklyResponse({ route });
     expect(response1.status).toEqual(200);
-    expect(calMock.get().history.get).toHaveLength(2);
-    expect(cacheSpySet).toHaveBeenCalledTimes(1);
-    expect(cacheSpySet).toHaveLastReturnedWith("calories-subject1");
+    expect(calMockservice.get().history.get).toHaveLength(apiCalls);
+    expect(cacheSpySet).toHaveBeenCalledTimes(cacheSetCalls);
+    expect(cacheSpySet).toHaveLastReturnedWith(`${route}-subject1`);
     expect(cacheSpyGet).toHaveBeenCalledTimes(1);
 
-    const response2 = await getWeeklyResponse("subject2");
+    const response2 = await getWeeklyResponse({ route, subject: "subject2" });
     expect(response2.status).toEqual(200);
-    expect(calMock.get().history.get).toHaveLength(4);
+    expect(calMockservice.get().history.get).toHaveLength(apiCalls * 2);
     expect(cacheSpySet).toHaveBeenCalledTimes(2);
-    expect(cacheSpySet).toHaveLastReturnedWith("calories-subject2");
-    expect(cache.getInstance().has("calories-subject1")).toEqual(true);
-    expect(cache.getInstance().has("calories-subject2")).toEqual(true);
-    expect(cache.getInstance().keys()).toHaveLength(2);
-    expect(cacheSpyGet).toHaveBeenCalledTimes(2);
+    expect(cacheSpySet).toHaveLastReturnedWith(`${route}-subject2`);
+    expect(cache.getInstance().has(`${route}-subject1`)).toEqual(true);
+    expect(cache.getInstance().has(`${route}-subject2`)).toEqual(true);
+    expect(cache.getInstance().keys()).toHaveLength(cacheSetCalls * 2);
+    expect(cacheSpyGet).toHaveBeenCalledTimes(cacheGetCalls * 2);
   });
 
   it("should throw an error if the subject is not present in the accessToken", async () => {
-    expect((await getWeeklyResponse("")).status).toBe(500);
+    expect((await getWeeklyResponse({ route, subject: "" })).status).toBe(500);
   });
 });

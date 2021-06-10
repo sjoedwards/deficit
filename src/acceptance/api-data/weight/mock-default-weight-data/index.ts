@@ -7,24 +7,24 @@ interface Mock {
   mockDefault: () => void;
 }
 
-const weightMock = (): Mock => {
-  const mock = new MockAdapter(axios);
+const weightMock = (mock: MockAdapter): Mock => {
+  const _mock = mock || new MockAdapter(axios);
 
   return {
-    get: () => mock,
+    get: () => _mock,
     mockDefault: () => {
       Object.entries(weightApiData).forEach(([monthToMock, mockData]) => {
         const urlWeightMonthly = new RegExp(
           `https://api.fitbit.com/1/user/-/body/log/weight/date/${monthToMock}/1m.json`
         );
-        mock.onGet(urlWeightMonthly).reply(200, {
+        _mock.onGet(urlWeightMonthly).reply(200, {
           weight: mockData,
         });
       });
       const fitbitApiweight = new RegExp(
         "https://api.fitbit.com/1/user/-/body/log/weight"
       );
-      mock.onGet(fitbitApiweight).reply(500);
+      _mock.onGet(fitbitApiweight).reply(500);
     },
   };
 };

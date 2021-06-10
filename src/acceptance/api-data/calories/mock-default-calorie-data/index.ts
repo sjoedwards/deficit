@@ -7,11 +7,11 @@ interface Mock {
   mockDefault: () => void;
 }
 
-const calorieMock = (): Mock => {
-  const mock = new MockAdapter(axios);
+const calorieMock = (mock?: MockAdapter): Mock => {
+  const _mock = mock || new MockAdapter(axios);
 
   return {
-    get: () => mock,
+    get: () => _mock,
     mockDefault: () => {
       const urlCalsInMonthly = new RegExp(
         "https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/3m.json"
@@ -19,10 +19,10 @@ const calorieMock = (): Mock => {
       const urlActivitiesCalsMonthly = new RegExp(
         "https://api.fitbit.com/1/user/-/activities/calories/date/today/3m.json"
       );
-      mock.onGet(urlCalsInMonthly).reply(200, {
+      _mock.onGet(urlCalsInMonthly).reply(200, {
         "foods-log-caloriesIn": caloriesApiData["foods-log-caloriesIn"],
       });
-      mock.onGet(urlActivitiesCalsMonthly).reply(200, {
+      _mock.onGet(urlActivitiesCalsMonthly).reply(200, {
         "activities-calories": caloriesApiData["activities-calories"],
       });
 
@@ -32,8 +32,8 @@ const calorieMock = (): Mock => {
       const fitbitApiActivities = new RegExp(
         "https://api.fitbit.com/1/user/-/activities/"
       );
-      mock.onGet(fitbitApiCalories).reply(500);
-      mock.onGet(fitbitApiActivities).reply(500);
+      _mock.onGet(fitbitApiCalories).reply(500);
+      _mock.onGet(fitbitApiActivities).reply(500);
     },
   };
 };
