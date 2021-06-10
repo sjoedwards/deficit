@@ -11,7 +11,8 @@ goalsRouter.get("/goals", async (ctx: Context) => {
 
   const combinedWeeklyValues = weeklyWeight.map(({ weekEnd, weight }) => {
     // Find the caloriesResponse entry for the dateTime
-    const calories = weeklyCalories.find((entry) => entry.weekEnd === weekEnd);
+    const calories = weeklyCalories.find((entry) => entry.weekEnd === weekEnd)
+      ?.deficit;
 
     return {
       weekEnd,
@@ -20,7 +21,9 @@ goalsRouter.get("/goals", async (ctx: Context) => {
     };
   });
 
-  console.log(combinedWeeklyValues);
+  // Linear regression stuff here!
+
+  // Extend so can pass in a week offset
 
   ctx.body = {};
 });

@@ -31,6 +31,7 @@ export interface FitbitCaloriesData {
   weekEnd: string;
   calories: string;
   activityCalories: string;
+  deficit: string;
 }
 
 export interface FitbitMacrosData {
