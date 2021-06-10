@@ -1,3 +1,4 @@
+import { linearRegression } from "simple-statistics";
 export interface APIFitbitCaloriesData {
   dateTime: string;
   calories: string;
@@ -50,3 +51,20 @@ export interface FitbitActivityData {
 }
 
 export type ResolutionNames = "daily" | "weekly";
+
+export interface DeficitGoalData {
+  weightDiff: string;
+  deficit: string;
+}
+
+export interface LinearRegressionInformation {
+  intercept: number;
+  gradient: number;
+  rSquaredValue: number;
+  regressionLine: (x: number) => number;
+}
+
+export interface PredictionData {
+  weightDiff: number;
+  rSquaredValue: number;
+}
