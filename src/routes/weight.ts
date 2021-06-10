@@ -1,66 +1,115 @@
-import { FitbitWeightData } from "./../../types/index";
+import moment from "moment";
+import {
+  APIFitbitWeightData,
+  FitbitDailyWeightData,
+  FitbitWeeklyWeightData,
+} from "./../../types/index";
 import { Context } from "koa";
 import axios from "axios";
-import moment from "moment";
 import Router from "@koa/router";
 import { cache } from "../cache";
 
 const weightRouter = new Router();
 
 const getWeight = async (
-  ctx: Context,
-  weeksAgo: number
-): Promise<FitbitWeightData> => {
+  ctx: Context
+): Promise<Array<FitbitDailyWeightData>> => {
   const headers = {
     Authorization: `Bearer ${ctx.state.token}`,
   };
-  const weekEnd = moment()
-    .subtract(weeksAgo, "weeks")
-    .endOf("isoWeek")
-    .format("YYYY-MM-DD");
-  const weightLog: Array<{ weight: string }> = (
-    await axios({
-      url: `https://api.fitbit.com/1/user/-/body/log/weight/date/${weekEnd}/1w.json`,
-      method: "get",
-      headers,
-    })
-  ).data.weight;
-  const weight =
-    weightLog.length &&
-    (
-      weightLog.reduce(
-        (sum: number, { weight: weightAgg }: { weight: string }) =>
-          sum + parseFloat(weightAgg),
-        0
-      ) / weightLog.length
-    ).toFixed(1);
-  return { weekEnd, weight };
-};
+  const getDatesForNMonthsAgo = (monthsAgo: number) => {
+    return Array.from({ length: monthsAgo }, (_, index) => {
+      return moment()
+        .subtract(index, "months")
+        .locale("en-gb")
+        .format("YYYY-MM-DD");
+    }).reverse();
+  };
 
-const aggregateWeights = async (ctx: Context) => {
-  return (
+  const weightResponse: Array<APIFitbitWeightData> = (
     await Promise.all(
-      Array(6)
-        .fill(undefined)
-        .map(async (_, index) => {
-          const weeksAgo = index + 1;
-          return getWeight(ctx, weeksAgo);
-        })
+      getDatesForNMonthsAgo(3).map(async (baseDate: string) => {
+        return (
+          await axios({
+            url: `https://api.fitbit.com/1/user/-/body/log/weight/date/${baseDate}/1m.json`,
+            method: "get",
+            headers,
+          })
+        )?.data?.weight;
+      })
     )
   )
-    .filter(({ weight }) => parseFloat(weight) !== 0)
-    .sort((a, b) => {
-      if (a.weekEnd === b.weekEnd) {
-        return 0;
+    .reduce(
+      // Flatten results into one array
+      (acc: Array<APIFitbitWeightData>, month: Array<APIFitbitWeightData>) => {
+        return acc.concat(month);
+      },
+      []
+    )
+    // remove duplicate dates
+    .reduce((acc: Array<APIFitbitWeightData>, current: APIFitbitWeightData) => {
+      const currentItemExists = acc.find(
+        (item) => item.date === current.date && item.weight === current.weight
+      );
+      if (!currentItemExists) {
+        return acc.concat([current]);
+      } else {
+        return acc;
       }
-      return a.weekEnd > b.weekEnd ? 1 : -1;
-    });
+    }, []);
+
+  return weightResponse.map(({ date, weight }) => {
+    return {
+      dateTime: date,
+      weight: weight?.toString(),
+    };
+  });
 };
 
-weightRouter.get("/weight", async (ctx: Context) => {
-  // TODO Cache should be a key which incorperates UID for each user
-  const cachedWeight: Array<FitbitWeightData> = cache.get("weight", ctx);
-  let weight;
+const getWeeklyWeight = async (
+  apiWeight: Array<FitbitDailyWeightData>
+): Promise<Array<FitbitWeeklyWeightData>> => {
+  const weeklyWeight = apiWeight
+    // Get unique weeks
+    .map((entry) => {
+      return moment(entry.dateTime).locale("en-gb").week();
+    })
+    .filter((value, index, self) => self.indexOf(value) === index)
+    // Nested array of entries for each week
+    .map((week) =>
+      apiWeight.filter(
+        (entry) => moment(entry.dateTime).locale("en-gb").week() === week
+      )
+    )
+    .map((weeklyWeight) => {
+      return {
+        // Reduce each week to a single value
+        weight: (
+          weeklyWeight.reduce(
+            (sum: number, { weight }) => sum + parseFloat(`${weight}`),
+            0
+          ) / weeklyWeight.length
+        ).toFixed(1),
+        // Find the week end date from the first value
+        weekEnd: (() => {
+          return moment(Object.values(weeklyWeight)[0].dateTime)
+            .endOf("isoWeek")
+            .format("YYYY-MM-DD");
+        })(),
+      };
+    })
+    .filter(
+      (week) =>
+        week.weekEnd !==
+        moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
+    );
+
+  return weeklyWeight;
+};
+
+weightRouter.get("/weight/:resolution", async (ctx: Context) => {
+  let weight: Array<FitbitDailyWeightData>;
+  const cachedWeight: Array<FitbitDailyWeightData> = cache.get("weight", ctx);
   if (cachedWeight) {
     /* eslint-disable-next-line no-console */
     console.log("Retrieving weight from cache");
@@ -68,11 +117,26 @@ weightRouter.get("/weight", async (ctx: Context) => {
   } else {
     /* eslint-disable-next-line no-console */
     console.log("Getting weight from fitbit");
-    weight = await aggregateWeights(ctx);
-
+    weight = await getWeight(ctx);
     cache.set("weight", weight, ctx);
   }
-  ctx.body = weight;
+  const resolution: string = ctx.params.resolution || "weekly";
+  const resolutionsMap = {
+    weekly: async (
+      weight: Array<FitbitDailyWeightData>
+    ): Promise<Array<FitbitWeeklyWeightData>> => await getWeeklyWeight(weight),
+    daily: (
+      weight: Array<FitbitDailyWeightData>
+    ): Array<FitbitDailyWeightData> => weight,
+  };
+
+  const [, getCaloriesMethod] = Object.entries(resolutionsMap).find(
+    ([key]) => key === resolution
+  );
+
+  const weightData = await getCaloriesMethod(weight);
+
+  ctx.body = weightData;
 });
 
 export { weightRouter };

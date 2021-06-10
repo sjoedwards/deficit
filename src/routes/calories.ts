@@ -134,9 +134,12 @@ caloriesRouter.get("/calories/:resolution", async (ctx: Context) => {
   const resolution: string = ctx.params.resolution || "weekly";
 
   const resolutionsMap = {
-    weekly: async (calories: Array<APIFitbitCaloriesData>) =>
-      await getWeeklyCalories(calories),
-    daily: async (calories: Array<APIFitbitCaloriesData>) => calories,
+    weekly: async (
+      calories: Array<APIFitbitCaloriesData>
+    ): Promise<Array<FitbitCaloriesData>> => await getWeeklyCalories(calories),
+    daily: (
+      calories: Array<APIFitbitCaloriesData>
+    ): Array<APIFitbitCaloriesData> => calories,
   };
 
   const [, getCaloriesMethod] = Object.entries(resolutionsMap).find(
