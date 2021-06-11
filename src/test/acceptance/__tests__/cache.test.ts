@@ -22,7 +22,7 @@ let cacheSpyGet: jest.SpyInstance;
 let realDateNow: () => number;
 beforeEach(() => {
   realDateNow = Date.now.bind(global.Date);
-  // stub date to 2021-05-29, 12:00:00
+  // stub date to 1 June 2021 22:57:05
   global.Date.now = jest.fn().mockReturnValue(1622588225000);
   cacheSpySet = jest.spyOn(cache, "set");
   cacheSpyGet = jest.spyOn(cache, "get");

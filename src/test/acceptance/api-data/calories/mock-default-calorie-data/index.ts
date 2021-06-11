@@ -14,10 +14,10 @@ const calorieMock = (mock?: MockAdapter): Mock => {
     get: () => _mock,
     mockDefault: () => {
       const urlCalsInMonthly = new RegExp(
-        "https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/3m.json"
+        "https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/1y.json"
       );
       const urlActivitiesCalsMonthly = new RegExp(
-        "https://api.fitbit.com/1/user/-/activities/calories/date/today/3m.json"
+        "https://api.fitbit.com/1/user/-/activities/calories/date/today/1y.json"
       );
       _mock.onGet(urlCalsInMonthly).reply(200, {
         "foods-log-caloriesIn": caloriesApiData["foods-log-caloriesIn"],
