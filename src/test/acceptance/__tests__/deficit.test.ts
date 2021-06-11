@@ -1,5 +1,5 @@
 import request from "supertest";
-import { app } from "../../app";
+import { app } from "../../../app";
 import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import { deficitExpectedResponse } from "../expected-responses/deficit";

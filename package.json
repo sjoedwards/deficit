@@ -46,6 +46,7 @@
   "description": "",
   "dependencies": {
     "@koa/router": "^8.0.8",
+    "@shopify/jest-koa-mocks": "^3.0.1",
     "@types/btoa": "^1.2.3",
     "@types/jsonwebtoken": "^8.5.1",
     "@types/koa__router": "^8.0.4",

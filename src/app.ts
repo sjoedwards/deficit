@@ -17,9 +17,13 @@ config({ path: ".env" });
 app
   .use(errorMiddleware)
   /* eslint-disable-next-line no-unused-vars */
-  .on("error", (err): void => {
+  .on("error", (err, ctx): void => {
     /* eslint-disable-next-line no-console */
-    console.log(err);
+    console.error(err, ctx.state);
+    ctx.status = 500;
+    ctx.body = {
+      message: "Uh oh, Sam messed up, tell him to fix it",
+    };
   })
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)

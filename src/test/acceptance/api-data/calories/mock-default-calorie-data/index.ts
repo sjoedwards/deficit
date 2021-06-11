@@ -1,6 +1,6 @@
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import { caloriesApiData } from "../../../api-data/calories";
+import { caloriesApiData } from "..";
 
 interface Mock {
   get: () => MockAdapter;

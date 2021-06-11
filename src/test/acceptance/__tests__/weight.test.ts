@@ -1,5 +1,5 @@
 import request from "supertest";
-import { app } from "../../app";
+import { app } from "../../../app";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import { dailyWeightExpectedResponse } from "../expected-responses/weight/daily";
 import { weeklyWeightExpectedResponse } from "../expected-responses/weight/weekly";
