@@ -85,10 +85,12 @@ const predictService = async (
     return { rSquaredValue, weightDiff };
   };
 
-  return predictWeeklyWeightDiffForDeficit(
+  const weeklyWeightDiffForDeficit = predictWeeklyWeightDiffForDeficit(
     getCombinedWeeklyValues(1),
     parseInt(deficit)
   );
+
+  return weeklyWeightDiffForDeficit;
 };
 
 export { predictService };

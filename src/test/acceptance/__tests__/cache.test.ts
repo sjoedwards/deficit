@@ -1,8 +1,8 @@
 import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import request from "supertest";
-import { app } from "../../app";
-import { cache } from "../../cache";
+import { app } from "../../../app";
+import { cache } from "../../../cache";
 import { createMockJWT } from "../tools/create-mock-jwt";
 
 const getWeeklyResponse = async ({
