@@ -12,6 +12,42 @@ import {
   rSquared,
 } from "simple-statistics";
 import moment from "moment";
+import { logWarning } from "../../logger/warn";
+
+export const predictWeeklyWeightDiffForDeficit = (
+  combinedWeeklyValues: Array<DeficitGoalData>,
+  deficit: number,
+  ctx: Context
+): PredictionData => {
+  const { rSquaredValue, regressionLine } = getLinearRegressionInformation(
+    combinedWeeklyValues
+  );
+
+  if (!rSquaredValue) {
+    logWarning(`Determined RSquared value was falsey: ${rSquaredValue}`, ctx);
+  }
+
+  const weightDiff = regressionLine(deficit);
+
+  if (!weightDiff) {
+    logWarning(`Determined weightDiff value was falsey: ${rSquaredValue}`, ctx);
+  }
+
+  return { rSquaredValue, weightDiff };
+};
+
+export const getLinearRegressionInformation = (
+  combinedWeeklyValues: Array<DeficitGoalData>
+): LinearRegressionInformation => {
+  const coordinates = combinedWeeklyValues.map(({ deficit, weightDiff }) => {
+    return [parseFloat(deficit), parseFloat(weightDiff)];
+  });
+
+  const { m: gradient, b: intercept } = linearRegression(coordinates);
+  const regressionLine = linearRegressionLine({ m: gradient, b: intercept });
+  const rSquaredValue = rSquared(coordinates, regressionLine);
+  return { intercept, gradient, rSquaredValue, regressionLine };
+};
 
 const predictService = async (
   ctx: Context,
@@ -19,6 +55,11 @@ const predictService = async (
 ): Promise<PredictionData> => {
   const weeklyCalories = await caloriesService("weekly", ctx);
   const weeklyWeight = await weightService("weekly", ctx);
+  ctx.state.data = {
+    ...ctx.state.data,
+    weeklyCalories,
+    weeklyWeight,
+  };
   const weeklyWeightWithDiff = weeklyWeight
     .map((weeklyValue, index) => {
       const previousWeekWeight = parseFloat(weeklyWeight[index - 1]?.weight);
@@ -50,19 +91,6 @@ const predictService = async (
       })
       .filter(({ deficit }) => typeof deficit !== "undefined");
 
-  const getLinearRegressionInformation = (
-    combinedWeeklyValues: Array<DeficitGoalData>
-  ): LinearRegressionInformation => {
-    const coordinates = combinedWeeklyValues.map(({ deficit, weightDiff }) => {
-      return [parseFloat(deficit), parseFloat(weightDiff)];
-    });
-
-    const { m: gradient, b: intercept } = linearRegression(coordinates);
-    const regressionLine = linearRegressionLine({ m: gradient, b: intercept });
-    const rSquaredValue = rSquared(coordinates, regressionLine);
-    return { intercept, gradient, rSquaredValue, regressionLine };
-  };
-
   const getDeficitForWeightDiff = (
     goal: number,
     intercept: number,
@@ -74,20 +102,10 @@ const predictService = async (
     return (goal - intercept) / gradient;
   };
 
-  const predictWeeklyWeightDiffForDeficit = (
-    combinedWeeklyValues: Array<DeficitGoalData>,
-    deficit: number
-  ) => {
-    const { rSquaredValue, regressionLine } = getLinearRegressionInformation(
-      combinedWeeklyValues
-    );
-    const weightDiff = regressionLine(deficit);
-    return { rSquaredValue, weightDiff };
-  };
-
   const weeklyWeightDiffForDeficit = predictWeeklyWeightDiffForDeficit(
     getCombinedWeeklyValues(1),
-    parseInt(deficit)
+    parseInt(deficit),
+    ctx
   );
 
   return weeklyWeightDiffForDeficit;
