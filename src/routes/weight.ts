@@ -27,8 +27,7 @@ const getWeight = async (
         .format("YYYY-MM-DD");
     }).reverse();
   };
-  const date = moment(1622588225000).locale("en-gb").format("YYYY-MM-DD");
-  // Start here - get a mock
+
   const weightResponse: Array<APIFitbitWeightData> = (
     await Promise.all(
       getDatesForNMonthsAgo(12).map(async (baseDate: string) => {
