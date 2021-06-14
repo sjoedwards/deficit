@@ -2,8 +2,9 @@ import request from "supertest";
 import { app } from "../../../app";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import { dailyWeightExpectedResponse } from "../expected-responses/weight/daily";
+import { monthlyWeightExpectedResponse } from "../expected-responses/weight/monthly";
 import { weeklyWeightExpectedResponse } from "../expected-responses/weight/weekly";
-import { createMockJWT } from "../tools/create-mock-jwt";
+import { createMockJWT } from "../../tools/create-mock-jwt";
 
 let realDateNow: () => number;
 beforeEach(() => {
@@ -22,6 +23,23 @@ beforeEach(() => {
 });
 
 describe("Weight Route", () => {
+  it("should return 404 if resolution type is not supported", async () => {
+    await request(app.callback())
+      .get("/weight/fortnightly")
+      .set("Cookie", `accessToken=${createMockJWT()}`)
+      .send()
+      .expect(400);
+  });
+
+  it("should return the correct weight information for a monthly resolution", async () => {
+    const monthlyResponse = await request(app.callback())
+      .get("/weight/monthly")
+      .set("Cookie", `accessToken=${createMockJWT()}`)
+      .send()
+      .expect(200);
+    expect(monthlyResponse.body).toEqual(monthlyWeightExpectedResponse);
+  });
+
   it("should return the correct weight information for a weekly resolution", async () => {
     const weeklyResponse = await request(app.callback())
       .get("/weight/weekly")

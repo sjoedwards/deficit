@@ -3,7 +3,7 @@ import { app } from "../../../app";
 import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
 import { deficitExpectedResponse } from "../expected-responses/deficit";
-import { createMockJWT } from "../tools/create-mock-jwt";
+import { createMockJWT } from "../../tools/create-mock-jwt";
 
 let realDateNow: () => number;
 beforeEach(() => {

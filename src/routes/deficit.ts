@@ -1,4 +1,4 @@
-import { APIFitbitCaloriesData } from "./../../types/index";
+import { FitbitDailyCaloriesData } from "./../../types/index";
 import { getCalories } from "./calories";
 
 import { Context } from "koa";
@@ -9,7 +9,7 @@ import { predictService } from "../services/predict";
 
 const deficitRouter = new Router();
 
-const getMonthlyCalories = (apiCalories: Array<APIFitbitCaloriesData>) => {
+const getMonthlyCalories = (apiCalories: Array<FitbitDailyCaloriesData>) => {
   return (
     apiCalories
       // Get unique months
@@ -26,7 +26,7 @@ const getMonthlyCalories = (apiCalories: Array<APIFitbitCaloriesData>) => {
   );
 };
 
-const getAverageDeficit = (calories: Array<APIFitbitCaloriesData>) =>
+const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) =>
   (
     calories.reduce(
       (sum: number, { deficit }) => sum + parseInt(`${deficit}`, 10),
@@ -35,8 +35,8 @@ const getAverageDeficit = (calories: Array<APIFitbitCaloriesData>) =>
   ).toFixed(0);
 
 deficitRouter.get("/deficit", async (ctx: Context) => {
-  let calories: Array<APIFitbitCaloriesData>;
-  const cachedCalories: Array<APIFitbitCaloriesData> = cache.get(
+  let calories: Array<FitbitDailyCaloriesData>;
+  const cachedCalories: Array<FitbitDailyCaloriesData> = cache.get(
     "calories",
     ctx
   );
@@ -58,7 +58,7 @@ deficitRouter.get("/deficit", async (ctx: Context) => {
   const averageDeficitCurrentMonth = getAverageDeficit(caloriesCurrentMonth);
 
   const { weightDiff, rSquaredValue } =
-    (await predictService(ctx, averageDeficitCurrentMonth)) || {};
+    (await predictService(ctx, averageDeficitCurrentMonth, "weekly")) || {};
   const weightDiffFixed = weightDiff.toFixed(3);
 
   ctx.body = {

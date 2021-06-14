@@ -1,8 +1,9 @@
 import {
   ResolutionNames,
-  APIFitbitCaloriesData,
   FitbitData,
-  FitbitCaloriesData,
+  FitbitDailyCaloriesData,
+  FitbitWeeklyCaloriesData,
+  FitbitMonthlyCaloriesData,
 } from "./../../types/index";
 
 import { Context } from "koa";
@@ -13,9 +14,67 @@ import { cache } from "../cache";
 
 const caloriesRouter = new Router();
 
+const getMonthlyCalories = async (
+  apiCalories: Array<FitbitDailyCaloriesData>
+): Promise<Array<FitbitMonthlyCaloriesData>> => {
+  const monthlyCalories = apiCalories
+    // Get unique months
+    .map((entry) => {
+      return moment(entry.dateTime).locale("en-gb").month();
+    })
+    .filter((value, index, self) => self.indexOf(value) === index)
+    // Nested array of entries for each month
+    .map((month) =>
+      apiCalories.filter(
+        (entry) => moment(entry.dateTime).locale("en-gb").month() === month
+      )
+    )
+    .map((monthlyCalories) => {
+      const averageCalories = {
+        // Reduce each month to a single value
+        calories: (
+          monthlyCalories.reduce(
+            (sum: number, { calories }) => sum + parseInt(`${calories}`, 10),
+            0
+          ) / monthlyCalories.length
+        ).toFixed(0),
+        // Reduce each month to a single value
+        activityCalories: (
+          monthlyCalories.reduce(
+            (sum: number, { activityCalories }) =>
+              sum + parseInt(`${activityCalories}`, 10),
+            0
+          ) / monthlyCalories.length
+        ).toFixed(0),
+        // Find the month end date from the first value
+        monthEnd: (() => {
+          return moment(Object.values(monthlyCalories)[0].dateTime)
+            .endOf("month")
+            .format("YYYY-MM-DD");
+        })(),
+      };
+
+      return {
+        ...averageCalories,
+        deficit: (
+          parseInt(averageCalories.calories) -
+          parseInt(averageCalories.activityCalories)
+        ).toString(),
+      };
+    })
+    // Filter results from this month
+    .filter(
+      (month) =>
+        month.monthEnd !==
+        moment().locale("en-gb").endOf("month").format("YYYY-MM-DD")
+    );
+
+  return monthlyCalories;
+};
+
 export const getCalories = async (
   ctx: Context
-): Promise<Array<APIFitbitCaloriesData>> => {
+): Promise<Array<FitbitDailyCaloriesData>> => {
   const headers = {
     Authorization: `Bearer ${ctx.state.token}`,
   };
@@ -58,8 +117,8 @@ export const getCalories = async (
 };
 
 const getWeeklyCalories = async (
-  apiCalories: Array<APIFitbitCaloriesData>
-): Promise<Array<FitbitCaloriesData>> => {
+  apiCalories: Array<FitbitDailyCaloriesData>
+): Promise<Array<FitbitWeeklyCaloriesData>> => {
   const weeklyCalories = apiCalories
     // Get unique weeks
     .map((entry) => {
@@ -116,17 +175,19 @@ const getWeeklyCalories = async (
 };
 
 type ResolutionType<T> = T extends "daily"
-  ? APIFitbitCaloriesData[]
+  ? FitbitDailyCaloriesData[]
   : T extends "weekly"
-  ? FitbitCaloriesData[]
+  ? FitbitWeeklyCaloriesData[]
+  : T extends "monthly"
+  ? FitbitMonthlyCaloriesData[]
   : never;
 
 export const caloriesService = async <T extends ResolutionNames>(
   resolution: T,
   ctx: Context
 ): Promise<ResolutionType<T>> => {
-  let calories: Array<APIFitbitCaloriesData>;
-  const cachedCalories: Array<APIFitbitCaloriesData> = cache.get(
+  let calories: Array<FitbitDailyCaloriesData>;
+  const cachedCalories: Array<FitbitDailyCaloriesData> = cache.get(
     "calories",
     ctx
   );
@@ -142,18 +203,26 @@ export const caloriesService = async <T extends ResolutionNames>(
   }
 
   const resolutionsMap = {
-    weekly: async (
-      calories: Array<APIFitbitCaloriesData>
-    ): Promise<Array<FitbitCaloriesData>> => await getWeeklyCalories(calories),
     daily: (
-      calories: Array<APIFitbitCaloriesData>
-    ): Array<APIFitbitCaloriesData> => calories,
+      calories: Array<FitbitDailyCaloriesData>
+    ): Array<FitbitDailyCaloriesData> => calories,
+    weekly: async (
+      calories: Array<FitbitDailyCaloriesData>
+    ): Promise<Array<FitbitWeeklyCaloriesData>> =>
+      await getWeeklyCalories(calories),
+    monthly: async (
+      calories: Array<FitbitDailyCaloriesData>
+    ): Promise<Array<FitbitMonthlyCaloriesData>> =>
+      await getMonthlyCalories(calories),
   };
 
   // Fix these types
-  const [, getCaloriesMethod] = Object.entries(resolutionsMap).find(
-    ([key]) => key === resolution
-  );
+  const [, getCaloriesMethod] =
+    Object.entries(resolutionsMap).find(([key]) => key === resolution) || [];
+
+  if (!getCaloriesMethod) {
+    ctx.throw(400, "Resolution not supported");
+  }
 
   const caloriesData = (await getCaloriesMethod(calories)) as ResolutionType<T>;
 

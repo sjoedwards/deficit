@@ -1,8 +1,10 @@
 import {
+  ResolutionNames,
   DeficitGoalData,
   LinearRegressionInformation,
   PredictionData,
-} from "../../../types/index";
+} from "./../../../types/index";
+
 import { weightService } from "../../routes/weight";
 import { caloriesService } from "../../routes/calories";
 import { Context } from "koa";
@@ -14,13 +16,13 @@ import {
 import moment from "moment";
 import { logWarning } from "../../logger/warn";
 
-export const predictWeeklyWeightDiffForDeficit = (
-  combinedWeeklyValues: Array<DeficitGoalData>,
+export const predictWeightDiffForDeficit = (
+  combinedValues: Array<DeficitGoalData>,
   deficit: number,
   ctx: Context
 ): PredictionData => {
   const { rSquaredValue, regressionLine } = getLinearRegressionInformation(
-    combinedWeeklyValues
+    combinedValues
   );
 
   if (!rSquaredValue) {
@@ -51,64 +53,140 @@ export const getLinearRegressionInformation = (
 
 const predictService = async (
   ctx: Context,
-  deficit: string
+  deficit: string,
+  resolution: ResolutionNames
 ): Promise<PredictionData> => {
-  const weeklyCalories = await caloriesService("weekly", ctx);
-  const weeklyWeight = await weightService("weekly", ctx);
-  ctx.state.data = {
-    ...ctx.state.data,
-    weeklyCalories,
-    weeklyWeight,
+  if (resolution !== "weekly" && resolution !== "monthly") {
+    return ctx.throw(400, "resolution not supported");
+  }
+
+  const isWeekly = (resolution: ResolutionNames): resolution is "weekly" => {
+    return resolution === "weekly";
   };
-  const weeklyWeightWithDiff = weeklyWeight
-    .map((weeklyValue, index) => {
-      const previousWeekWeight = parseFloat(weeklyWeight[index - 1]?.weight);
-      return {
-        ...weeklyValue,
-        weightDiff:
-          previousWeekWeight &&
-          (parseFloat(weeklyValue.weight) - previousWeekWeight)?.toString(),
-      };
-    })
-    .filter(({ weightDiff }) => weightDiff);
 
-  const getCombinedWeeklyValues = (deficitWeeksAgo: number) =>
-    weeklyWeightWithDiff
-      .map(({ weekEnd, weightDiff }) => {
-        // Find the caloriesResponse entry for the dateTime
-        const deficit = weeklyCalories.find(
-          (entry) =>
-            entry.weekEnd ===
-            moment(weekEnd)
-              .subtract(deficitWeeksAgo, "week")
-              .format("YYYY-MM-DD")
-        )?.deficit;
+  const isMonthly = (resolution: ResolutionNames): resolution is "monthly" => {
+    return resolution === "monthly";
+  };
 
+  if (isWeekly(resolution)) {
+    const calories = await caloriesService(resolution, ctx);
+    const weight = await weightService(resolution, ctx);
+    ctx.state.data = {
+      ...ctx.state.data,
+      calories,
+      weight,
+    };
+
+    const weightWithDiff = weight
+      .map((value, index) => {
+        const previousValueWeight = parseFloat(weight[index - 1]?.weight);
         return {
-          weightDiff,
-          deficit,
+          ...value,
+          weightDiff:
+            previousValueWeight &&
+            (parseFloat(value.weight) - previousValueWeight)?.toString(),
         };
       })
-      .filter(({ deficit }) => typeof deficit !== "undefined");
+      .filter(({ weightDiff }) => weightDiff);
 
-  const getDeficitForWeightDiff = (
-    goal: number,
-    intercept: number,
-    gradient: number
-  ) => {
-    // y = mx + c
-    // weightDiff = m * deficit + c
-    // (weightDiff - c) / m = deficit
-    return (goal - intercept) / gradient;
-  };
+    const getCombinedWeeklyValues = (deficitWeeksAgo: number) =>
+      weightWithDiff
+        .map(({ weekEnd, weightDiff }) => {
+          // Find the caloriesResponse entry for the dateTime
+          const deficit = calories.find(
+            (entry) =>
+              entry.weekEnd ===
+              moment(weekEnd)
+                .subtract(deficitWeeksAgo, "week")
+                .format("YYYY-MM-DD")
+          )?.deficit;
 
-  const weeklyWeightDiffForDeficit = predictWeeklyWeightDiffForDeficit(
-    getCombinedWeeklyValues(1),
-    parseInt(deficit),
-    ctx
-  );
+          return {
+            weightDiff,
+            deficit,
+          };
+        })
+        .filter(({ deficit }) => typeof deficit !== "undefined");
 
-  return weeklyWeightDiffForDeficit;
+    const getDeficitForWeightDiff = (
+      goal: number,
+      intercept: number,
+      gradient: number
+    ) => {
+      // y = mx + c
+      // weightDiff = m * deficit + c
+      // (weightDiff - c) / m = deficit
+      return (goal - intercept) / gradient;
+    };
+
+    const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
+      getCombinedWeeklyValues(1),
+      parseInt(deficit),
+      ctx
+    );
+
+    return weeklyWeightDiffForDeficit;
+  }
+
+  if (isMonthly(resolution)) {
+    const calories = await caloriesService(resolution, ctx);
+    const weight = await weightService(resolution, ctx);
+    ctx.state.data = {
+      ...ctx.state.data,
+      calories,
+      weight,
+    };
+
+    const weightWithDiff = weight
+      .map((value, index) => {
+        const previousValueWeight = parseFloat(weight[index - 1]?.weight);
+        return {
+          ...value,
+          weightDiff:
+            previousValueWeight &&
+            (parseFloat(value.weight) - previousValueWeight)?.toString(),
+        };
+      })
+      .filter(({ weightDiff }) => weightDiff);
+
+    const getCombinedMonthlyValues = (deficitWeeksAgo: number) =>
+      weightWithDiff
+        .map(({ monthEnd, weightDiff }) => {
+          // Find the caloriesResponse entry for the dateTime
+          const deficit = calories.find(
+            (entry) =>
+              entry.monthEnd ===
+              moment(monthEnd)
+                .subtract(deficitWeeksAgo, "month")
+                .format("YYYY-MM-DD")
+          )?.deficit;
+
+          return {
+            weightDiff,
+            deficit,
+          };
+        })
+        .filter(({ deficit }) => typeof deficit !== "undefined");
+
+    const getDeficitForWeightDiff = (
+      goal: number,
+      intercept: number,
+      gradient: number
+    ) => {
+      // y = mx + c
+      // weightDiff = m * deficit + c
+      // (weightDiff - c) / m = deficit
+      return (goal - intercept) / gradient;
+    };
+
+    const monthlyDiffForDeficit = predictWeightDiffForDeficit(
+      getCombinedMonthlyValues(0),
+      parseInt(deficit),
+      ctx
+    );
+
+    return monthlyDiffForDeficit;
+  }
 };
 
 export { predictService };

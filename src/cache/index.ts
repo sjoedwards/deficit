@@ -7,6 +7,7 @@ const nodeCache = new NodeCache({ stdTTL: 3600, checkperiod: 300 });
 const getSubjectFromAccessToken = (ctx: Context) => {
   const accessToken = ctx.state.token;
   const { payload } = jwt?.decode(accessToken, { complete: true }) || {};
+
   if (!payload?.sub) {
     throw new Error("Could not obtain subject from access token");
   }

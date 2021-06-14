@@ -2,8 +2,9 @@ import request from "supertest";
 import { app } from "../../../app";
 import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
 import { dailyCaloriesExpectedResponse } from "../expected-responses/calories/daily";
+import { monthlyCaloriesExpectedResponse } from "../expected-responses/calories/monthly";
 import { weeklyCaloriesExpectedResponse } from "../expected-responses/calories/weekly";
-import { createMockJWT } from "../tools/create-mock-jwt";
+import { createMockJWT } from "../../tools/create-mock-jwt";
 
 let realDateNow: () => number;
 beforeEach(() => {
@@ -22,6 +23,21 @@ beforeEach(() => {
 });
 
 describe("Calories Route", () => {
+  it("should return 404 if resolution type is not supported", async () => {
+    await request(app.callback())
+      .get("/calories/fortnightly")
+      .set("Cookie", `accessToken=${createMockJWT()}`)
+      .send()
+      .expect(400);
+  });
+  it("should return the correct weight information for a monthly resolution", async () => {
+    const monthlyResponse = await request(app.callback())
+      .get("/calories/monthly")
+      .set("Cookie", `accessToken=${createMockJWT()}`)
+      .send()
+      .expect(200);
+    expect(monthlyResponse.body).toEqual(monthlyCaloriesExpectedResponse);
+  });
   it("should return the correct calorie information for a weekly resolution", async () => {
     const weeklyResponse = await request(app.callback())
       .get("/calories/weekly")

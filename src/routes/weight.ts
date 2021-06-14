@@ -1,8 +1,8 @@
 import moment from "moment";
 import {
-  APIFitbitCaloriesData,
   APIFitbitWeightData,
   FitbitDailyWeightData,
+  FitbitMonthlyWeightData,
   FitbitWeeklyWeightData,
   ResolutionNames,
 } from "./../../types/index";
@@ -68,6 +68,46 @@ const getWeight = async (
   });
 };
 
+const getMonthlyWeight = async (
+  apiWeight: Array<FitbitDailyWeightData>
+): Promise<Array<FitbitMonthlyWeightData>> => {
+  const monthlyWeight = apiWeight
+    // Get unique weeks
+    .map((entry) => {
+      return moment(entry.dateTime).locale("en-gb").month();
+    })
+    .filter((value, index, self) => self.indexOf(value) === index)
+    // Nested array of entries for each week
+    .map((month) =>
+      apiWeight.filter(
+        (entry) => moment(entry.dateTime).locale("en-gb").month() === month
+      )
+    )
+    .map((monthlyWeight) => {
+      return {
+        // Reduce each week to a single value
+        weight: (
+          monthlyWeight.reduce(
+            (sum: number, { weight }) => sum + parseFloat(`${weight}`),
+            0
+          ) / monthlyWeight.length
+        ).toFixed(1),
+        // Find the week end date from the first value
+        monthEnd: (() => {
+          return moment(Object.values(monthlyWeight)[0].dateTime)
+            .endOf("month")
+            .format("YYYY-MM-DD");
+        })(),
+      };
+    })
+    .filter(
+      (month) =>
+        month.monthEnd !==
+        moment().locale("en-gb").endOf("month").format("YYYY-MM-DD")
+    );
+  return monthlyWeight;
+};
+
 const getWeeklyWeight = async (
   apiWeight: Array<FitbitDailyWeightData>
 ): Promise<Array<FitbitWeeklyWeightData>> => {
@@ -113,6 +153,8 @@ type ResolutionType<T> = T extends "daily"
   ? FitbitDailyWeightData[]
   : T extends "weekly"
   ? FitbitWeeklyWeightData[]
+  : T extends "monthly"
+  ? FitbitMonthlyWeightData[]
   : never;
 
 export const weightService = async <T extends ResolutionNames>(
@@ -132,17 +174,24 @@ export const weightService = async <T extends ResolutionNames>(
     cache.set("weight", weight, ctx);
   }
   const resolutionsMap = {
-    weekly: async (
-      weight: Array<FitbitDailyWeightData>
-    ): Promise<Array<FitbitWeeklyWeightData>> => await getWeeklyWeight(weight),
     daily: (
       weight: Array<FitbitDailyWeightData>
     ): Array<FitbitDailyWeightData> => weight,
+    weekly: async (
+      weight: Array<FitbitDailyWeightData>
+    ): Promise<Array<FitbitWeeklyWeightData>> => await getWeeklyWeight(weight),
+    monthly: async (
+      weight: Array<FitbitDailyWeightData>
+    ): Promise<Array<FitbitMonthlyWeightData>> =>
+      await getMonthlyWeight(weight),
   };
 
-  const [, getWeightMethod] = Object.entries(resolutionsMap).find(
-    ([key]) => key === resolution
-  );
+  const [, getWeightMethod] =
+    Object.entries(resolutionsMap).find(([key]) => key === resolution) || [];
+  if (!getWeightMethod) {
+    ctx.throw(400, "Resolution not supported");
+  }
+
   const weightData = (await getWeightMethod(weight)) as ResolutionType<T>;
 
   return weightData;

@@ -20,7 +20,6 @@ app
   .on("error", (err, ctx): void => {
     /* eslint-disable-next-line no-console */
     console.error(err, ctx.state);
-    ctx.status = 500;
     ctx.body = {
       message: "Uh oh, Sam messed up, tell him to fix it",
     };
