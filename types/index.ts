@@ -1,6 +1,18 @@
-import { linearRegression } from "simple-statistics";
-export interface APIFitbitCaloriesData {
+export interface FitbitDailyCaloriesData {
   dateTime: string;
+  calories: string;
+  activityCalories: string;
+  deficit: string;
+}
+
+export interface FitbitWeeklyCaloriesData {
+  weekEnd: string;
+  calories: string;
+  activityCalories: string;
+  deficit: string;
+}
+export interface FitbitMonthlyCaloriesData {
+  monthEnd: string;
   calories: string;
   activityCalories: string;
   deficit: string;
@@ -23,16 +35,15 @@ export interface FitbitWeeklyWeightData {
   weekEnd: string;
   weight: string;
 }
+
+export interface FitbitMonthlyWeightData {
+  monthEnd: string;
+  weight: string;
+}
+
 export interface FitbitData {
   value: string;
   dateTime: string;
-}
-
-export interface FitbitCaloriesData {
-  weekEnd: string;
-  calories: string;
-  activityCalories: string;
-  deficit: string;
 }
 
 export interface FitbitMacrosData {
@@ -50,7 +61,7 @@ export interface FitbitActivityData {
   activityName: string;
 }
 
-export type ResolutionNames = "daily" | "weekly";
+export type ResolutionNames = "daily" | "weekly" | "monthly";
 
 export interface DeficitGoalData {
   weightDiff: string;
