@@ -80,7 +80,7 @@ export const getCalories = async (
   };
   const caloriesResponse: Array<FitbitData> = (
     await axios({
-      url: `https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/3m.json`,
+      url: `https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/6m.json`,
       method: "get",
       headers,
     })
@@ -90,7 +90,7 @@ export const getCalories = async (
 
   const activityCaloriesResponse: Array<FitbitData> = (
     await axios({
-      url: `https://api.fitbit.com/1/user/-/activities/calories/date/today/3m.json`,
+      url: `https://api.fitbit.com/1/user/-/activities/calories/date/today/6m.json`,
       method: "get",
       headers,
     })

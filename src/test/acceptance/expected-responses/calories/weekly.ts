@@ -1,9 +1,93 @@
 const weeklyCaloriesExpectedResponse = [
   {
-    calories: "2524",
-    activityCalories: "3351",
+    calories: "779",
+    activityCalories: "3440",
+    weekEnd: "2020-11-29",
+    deficit: "-2661",
+  },
+  {
+    calories: "1472",
+    activityCalories: "3239",
+    weekEnd: "2020-12-06",
+    deficit: "-1767",
+  },
+  {
+    calories: "2204",
+    activityCalories: "2869",
+    weekEnd: "2020-12-13",
+    deficit: "-665",
+  },
+  {
+    calories: "1709",
+    activityCalories: "3140",
+    weekEnd: "2020-12-20",
+    deficit: "-1431",
+  },
+  {
+    calories: "622",
+    activityCalories: "3069",
+    weekEnd: "2020-12-27",
+    deficit: "-2447",
+  },
+  {
+    calories: "1934",
+    activityCalories: "3415",
+    weekEnd: "2021-01-03",
+    deficit: "-1481",
+  },
+  {
+    calories: "1905",
+    activityCalories: "3164",
+    weekEnd: "2021-01-10",
+    deficit: "-1259",
+  },
+  {
+    calories: "2077",
+    activityCalories: "3044",
+    weekEnd: "2021-01-17",
+    deficit: "-967",
+  },
+  {
+    calories: "2199",
+    activityCalories: "3126",
+    weekEnd: "2021-01-24",
+    deficit: "-927",
+  },
+  {
+    calories: "2941",
+    activityCalories: "3372",
+    weekEnd: "2021-01-31",
+    deficit: "-431",
+  },
+  {
+    calories: "2842",
+    activityCalories: "3148",
+    weekEnd: "2021-02-07",
+    deficit: "-306",
+  },
+  {
+    calories: "2696",
+    activityCalories: "3234",
+    weekEnd: "2021-02-14",
+    deficit: "-538",
+  },
+  {
+    calories: "2738",
+    activityCalories: "3294",
+    weekEnd: "2021-02-21",
+    deficit: "-556",
+  },
+  {
+    calories: "2533",
+    activityCalories: "3347",
+    weekEnd: "2021-02-28",
+    deficit: "-814",
+  },
+  {
+    calories: "2351",
+    activityCalories: "3307",
     weekEnd: "2021-03-07",
-    deficit: "-827",
+    deficit: "-956",
   },
   {
     calories: "2229",
@@ -73,9 +157,9 @@ const weeklyCaloriesExpectedResponse = [
   },
   {
     calories: "3604",
-    activityCalories: "3608",
+    activityCalories: "3609",
     weekEnd: "2021-05-30",
-    deficit: "-4",
+    deficit: "-5",
   },
 ];
 

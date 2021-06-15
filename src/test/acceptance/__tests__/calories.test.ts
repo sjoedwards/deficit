@@ -9,7 +9,7 @@ import { createMockJWT } from "../../tools/create-mock-jwt";
 let realDateNow: () => number;
 beforeEach(() => {
   realDateNow = Date.now.bind(global.Date);
-  // stub date to 2021-05-29, 12:00:00
+  // stub date to 1 June 2021 22:57:05
   global.Date.now = jest.fn().mockReturnValue(1622588225000);
 });
 
@@ -30,7 +30,7 @@ describe("Calories Route", () => {
       .send()
       .expect(400);
   });
-  it("should return the correct weight information for a monthly resolution", async () => {
+  it("should return the correct calorie information for a monthly resolution", async () => {
     const monthlyResponse = await request(app.callback())
       .get("/calories/monthly")
       .set("Cookie", `accessToken=${createMockJWT()}`)

@@ -30,7 +30,7 @@ const getWeight = async (
 
   const weightResponse: Array<APIFitbitWeightData> = (
     await Promise.all(
-      getDatesForNMonthsAgo(3).map(async (baseDate: string) => {
+      getDatesForNMonthsAgo(6).map(async (baseDate: string) => {
         return (
           await axios({
             url: `https://api.fitbit.com/1/user/-/body/log/weight/date/${baseDate}/1m.json`,

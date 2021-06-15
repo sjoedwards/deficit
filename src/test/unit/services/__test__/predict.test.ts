@@ -34,19 +34,19 @@ describe("predictService", () => {
 
   it("should return the correct prediction given a weekly resolution", async () => {
     // @ts-ignore
-    const prediction = await predictService(ctx, "1000", "weekly");
+    const prediction = await predictService(ctx, "-1300", "weekly");
     expect(prediction).toEqual({
-      rSquaredValue: 0.21168538792119085,
-      weightDiff: 1.0903889404795961,
+      rSquaredValue: 0.10055919307078798,
+      weightDiff: -0.1194091652855076,
     });
   });
 
   it("should return the correct prediction given a monthly resolution", async () => {
     // @ts-ignore
-    const prediction = await predictService(ctx, "1000", "monthly");
+    const prediction = await predictService(ctx, "-1000", "monthly");
     expect(prediction).toEqual({
-      rSquaredValue: 1,
-      weightDiff: 9.948809523809672,
+      rSquaredValue: 0.6530176090803418,
+      weightDiff: -0.7890648261106703,
     });
   });
 });
