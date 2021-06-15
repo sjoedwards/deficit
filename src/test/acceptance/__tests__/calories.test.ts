@@ -30,12 +30,14 @@ describe("Calories Route", () => {
       .send()
       .expect(400);
   });
-  it("should return the correct weight information for a monthly resolution", async () => {
+  it("should return the correct calorie information for a monthly resolution", async () => {
     const monthlyResponse = await request(app.callback())
       .get("/calories/monthly")
       .set("Cookie", `accessToken=${createMockJWT()}`)
       .send()
       .expect(200);
+    // Start here - populating responses
+    console.log(monthlyResponse.body);
     expect(monthlyResponse.body).toEqual(monthlyCaloriesExpectedResponse);
   });
   it("should return the correct calorie information for a weekly resolution", async () => {

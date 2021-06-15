@@ -45,7 +45,7 @@ afterEach(() => {
 });
 describe.each([
   ["calories", 2, 1, 1],
-  ["weight", 3, 1, 1],
+  ["weight", 6, 1, 1],
 ])("Caching for %s route", (route, apiCalls, cacheGetCalls, cacheSetCalls) => {
   it("should return cached data if request made a second time for the same user", async () => {
     const response1 = await getWeeklyResponse({ route });
