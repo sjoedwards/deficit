@@ -36,8 +36,6 @@ describe("Calories Route", () => {
       .set("Cookie", `accessToken=${createMockJWT()}`)
       .send()
       .expect(200);
-    // Start here - populating responses
-    console.log(monthlyResponse.body);
     expect(monthlyResponse.body).toEqual(monthlyCaloriesExpectedResponse);
   });
   it("should return the correct calorie information for a weekly resolution", async () => {
