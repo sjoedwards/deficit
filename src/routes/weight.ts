@@ -109,7 +109,8 @@ const getMonthlyWeight = async (
 };
 
 const getWeeklyWeight = async (
-  apiWeight: Array<FitbitDailyWeightData>
+  apiWeight: Array<FitbitDailyWeightData>,
+  decimalPlaces?: number
 ): Promise<Array<FitbitWeeklyWeightData>> => {
   const weeklyWeight = apiWeight
     // Get unique weeks
@@ -126,12 +127,16 @@ const getWeeklyWeight = async (
     .map((weeklyWeight) => {
       return {
         // Reduce each week to a single value
-        weight: (
-          weeklyWeight.reduce(
-            (sum: number, { weight }) => sum + parseFloat(`${weight}`),
-            0
-          ) / weeklyWeight.length
-        ).toFixed(1),
+        weight: (() => {
+          const weight =
+            weeklyWeight.reduce(
+              (sum: number, { weight }) => sum + parseFloat(`${weight}`),
+              0
+            ) / weeklyWeight.length;
+          return decimalPlaces
+            ? weight.toFixed(decimalPlaces)
+            : weight.toString();
+        })(),
         // Find the week end date from the first value
         weekEnd: (() => {
           return moment(Object.values(weeklyWeight)[0].dateTime)
@@ -159,7 +164,8 @@ type ResolutionType<T> = T extends "daily"
 
 export const weightService = async <T extends ResolutionNames>(
   resolution: T,
-  ctx: Context
+  ctx: Context,
+  decimalPlaces?: number
 ): Promise<ResolutionType<T>> => {
   let weight: Array<FitbitDailyWeightData>;
   const cachedWeight: Array<FitbitDailyWeightData> = cache.get("weight", ctx);
@@ -179,7 +185,8 @@ export const weightService = async <T extends ResolutionNames>(
     ): Array<FitbitDailyWeightData> => weight,
     weekly: async (
       weight: Array<FitbitDailyWeightData>
-    ): Promise<Array<FitbitWeeklyWeightData>> => await getWeeklyWeight(weight),
+    ): Promise<Array<FitbitWeeklyWeightData>> =>
+      await getWeeklyWeight(weight, decimalPlaces),
     monthly: async (
       weight: Array<FitbitDailyWeightData>
     ): Promise<Array<FitbitMonthlyWeightData>> =>
@@ -199,7 +206,7 @@ export const weightService = async <T extends ResolutionNames>(
 
 weightRouter.get("/weight/:resolution", async (ctx: Context) => {
   const resolution: ResolutionNames = ctx.params.resolution || "weekly";
-  ctx.body = await weightService(resolution, ctx);
+  ctx.body = await weightService(resolution, ctx, 1);
 });
 
 export { weightRouter };

@@ -27,22 +27,30 @@ beforeEach(() => {
 
 describe("predictService", () => {
   it("should throw an error when resolution is not supported", async () => {
-    // @ts-ignore
+    //@ts-expect-error
     await predictService(ctx, "1000", "fortnightly");
     expect(ctx.throw).toHaveBeenCalledWith(400, "resolution not supported");
   });
 
   it("should return the correct prediction given a weekly resolution", async () => {
-    // @ts-ignore
     const prediction = await predictService(ctx, "-1300", "weekly");
     expect(prediction).toEqual({
-      rSquaredValue: 0.10055919307078798,
-      weightDiff: -0.1194091652855076,
+      rSquaredValue: 0.09111735235647,
+      weightDiff: -0.11308176980484691,
+    });
+  });
+
+  it("should return the correct prediction given a weekly resolution, three point weight diff average", async () => {
+    const prediction = await predictService(ctx, "-1300", "weekly", {
+      weightDiffMovingAverage: 3,
+    });
+    expect(prediction).toEqual({
+      rSquaredValue: 0.06912166747487314,
+      weightDiff: -0.04171263550561191,
     });
   });
 
   it("should return the correct prediction given a monthly resolution", async () => {
-    // @ts-ignore
     const prediction = await predictService(ctx, "-1000", "monthly");
     expect(prediction).toEqual({
       rSquaredValue: 0.6530176090803418,

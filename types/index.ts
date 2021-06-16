@@ -34,6 +34,7 @@ export interface FitbitDailyWeightData {
 export interface FitbitWeeklyWeightData {
   weekEnd: string;
   weight: string;
+  weightDiff?: string;
 }
 
 export interface FitbitMonthlyWeightData {

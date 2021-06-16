@@ -1,9 +1,9 @@
 import request from "supertest";
 import { app } from "../../../app";
 import { calorieMock } from "../api-data/calories/mock-default-calorie-data";
-import { dailyCaloriesExpectedResponse } from "../expected-responses/calories/daily";
-import { monthlyCaloriesExpectedResponse } from "../expected-responses/calories/monthly";
-import { weeklyCaloriesExpectedResponse } from "../expected-responses/calories/weekly";
+import { dailyCaloriesExpectedResponse } from "../../expected-responses/calories/daily";
+import { monthlyCaloriesExpectedResponse } from "../../expected-responses/calories/monthly";
+import { weeklyCaloriesExpectedResponse } from "../../expected-responses/calories/weekly";
 import { createMockJWT } from "../../tools/create-mock-jwt";
 
 let realDateNow: () => number;
