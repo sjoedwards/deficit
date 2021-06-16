@@ -3,6 +3,7 @@ import {
   DeficitGoalData,
   LinearRegressionInformation,
   PredictionData,
+  FitbitWeeklyWeightData,
 } from "./../../../types/index";
 
 import { weightService } from "../../routes/weight";
@@ -15,6 +16,7 @@ import {
 } from "simple-statistics";
 import moment from "moment";
 import { logWarning } from "../../logger/warn";
+import { simpleMovingWeightAverage } from "../../test/tools/simple-moving-weight-average";
 
 export const predictWeightDiffForDeficit = (
   combinedValues: Array<DeficitGoalData>,
@@ -51,10 +53,15 @@ export const getLinearRegressionInformation = (
   return { intercept, gradient, rSquaredValue, regressionLine };
 };
 
+interface IPredictServiceOptions {
+  weightDiffMovingAverage: number;
+}
+
 const predictService = async (
   ctx: Context,
   deficit: string,
-  resolution: ResolutionNames
+  resolution: ResolutionNames,
+  options?: IPredictServiceOptions
 ): Promise<PredictionData> => {
   if (resolution !== "weekly" && resolution !== "monthly") {
     return ctx.throw(400, "resolution not supported");
@@ -77,7 +84,7 @@ const predictService = async (
       weight,
     };
 
-    const weightWithDiff = weight
+    const weightWithDiff: FitbitWeeklyWeightData[] = weight
       .map((value, index) => {
         const previousValueWeight = parseFloat(weight[index - 1]?.weight);
         return {
@@ -89,8 +96,15 @@ const predictService = async (
       })
       .filter(({ weightDiff }) => weightDiff);
 
+    const simpleWeightMovingAverage =
+      options?.weightDiffMovingAverage &&
+      simpleMovingWeightAverage(
+        weightWithDiff,
+        options?.weightDiffMovingAverage
+      );
+
     const getCombinedWeeklyValues = (deficitWeeksAgo: number) =>
-      weightWithDiff
+      (simpleWeightMovingAverage || weightWithDiff)
         .map(({ weekEnd, weightDiff }) => {
           // Find the caloriesResponse entry for the dateTime
           const deficit = calories.find(

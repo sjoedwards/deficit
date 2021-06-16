@@ -1,9 +1,9 @@
 import request from "supertest";
 import { app } from "../../../app";
 import { weightMock } from "../api-data/weight/mock-default-weight-data";
-import { dailyWeightExpectedResponse } from "../expected-responses/weight/daily";
-import { monthlyWeightExpectedResponse } from "../expected-responses/weight/monthly";
-import { weeklyWeightExpectedResponse } from "../expected-responses/weight/weekly";
+import { dailyWeightExpectedResponse } from "../../expected-responses/weight/daily";
+import { monthlyWeightExpectedResponse } from "../../expected-responses/weight/monthly";
+import { weeklyWeightExpectedResponse } from "../../expected-responses/weight/weekly";
 import { createMockJWT } from "../../tools/create-mock-jwt";
 
 let realDateNow: () => number;

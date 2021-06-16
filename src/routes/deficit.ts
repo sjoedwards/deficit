@@ -59,6 +59,14 @@ deficitRouter.get("/deficit", async (ctx: Context) => {
 
   const { weightDiff, rSquaredValue } =
     (await predictService(ctx, averageDeficitCurrentMonth, "weekly")) || {};
+  const { weightDiff: weightDiff3Point, rSquaredValue: rSquaredValue3Point } =
+    (await predictService(ctx, averageDeficitCurrentMonth, "weekly", {
+      weightDiffMovingAverage: 3,
+    })) || {};
+  const { weightDiff: weightDiff5Point, rSquaredValue: rSquaredValue5Point } =
+    (await predictService(ctx, averageDeficitCurrentMonth, "weekly", {
+      weightDiffMovingAverage: 5,
+    })) || {};
   const weightDiffFixed = weightDiff.toFixed(3);
 
   ctx.body = {
@@ -70,8 +78,18 @@ deficitRouter.get("/deficit", async (ctx: Context) => {
     averageDeficitCurrentMonth,
     // TODO replace with frontend functionality
     predictedWeeklyWeightDiff: {
-      weightDiffKilos: weightDiffFixed,
-      rSquaredValue: rSquaredValue.toFixed(3),
+      noMovingAverage: {
+        weightDiffKilos: weightDiffFixed,
+        rSquaredValue: rSquaredValue.toFixed(3),
+      },
+      threePointMoving: {
+        weightDiffKilos: weightDiff3Point.toFixed(3),
+        rSquaredValue: rSquaredValue3Point.toFixed(3),
+      },
+      fivePointMoving: {
+        weightDiffKilos: weightDiff5Point.toFixed(3),
+        rSquaredValue: weightDiff5Point.toFixed(3),
+      },
     },
     deficits: deficitsCurrentMonth,
   };
