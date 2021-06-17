@@ -5,7 +5,7 @@ const deficitExpectedResponse = {
   predictedWeeklyWeightDiff: {
     noMovingAverage: { weightDiffKilos: "-0.044", rSquaredValue: "0.091" },
     threePointMoving: { weightDiffKilos: "-0.009", rSquaredValue: "0.069" },
-    fivePointMoving: { weightDiffKilos: "-0.022", rSquaredValue: "-0.022" },
+    fivePointMoving: { weightDiffKilos: "-0.022", rSquaredValue: "0.084" },
   },
   deficits: [{ dateTime: "2021-06-01", deficit: "-1095" }],
 };
