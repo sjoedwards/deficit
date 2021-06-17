@@ -7,7 +7,6 @@ import {
 } from "./../../../types/index";
 
 import { weightService } from "../../routes/weight";
-import { caloriesService } from "../../routes/calories";
 import { Context } from "koa";
 import {
   linearRegression,
@@ -17,16 +16,16 @@ import {
 import moment from "moment";
 import { logWarning } from "../../logger/warn";
 import { simpleMovingWeightAverage } from "../../test/tools/simple-moving-weight-average";
+import { predictDeficitForRemainderOfMonth } from "./predict-deficit-for-remainder";
+import { caloriesService } from "../calories";
 
 export const predictWeightDiffForDeficit = (
   combinedValues: Array<DeficitGoalData>,
   deficit: number,
-  ctx: Context
-): PredictionData => {
-  const { rSquaredValue, regressionLine } = getLinearRegressionInformation(
-    combinedValues
-  );
-
+  ctx: Context,
+  linearRegressionInformation: LinearRegressionInformation
+): { rSquaredValue: number; weightDiff: number } => {
+  const { rSquaredValue, regressionLine } = linearRegressionInformation || {};
   if (!rSquaredValue) {
     logWarning(`Determined RSquared value was falsey: ${rSquaredValue}`, ctx);
   }
@@ -61,6 +60,7 @@ const predictService = async (
   ctx: Context,
   deficit: string,
   resolution: ResolutionNames,
+  goal: number,
   options?: IPredictServiceOptions
 ): Promise<PredictionData> => {
   if (resolution !== "weekly" && resolution !== "monthly") {
@@ -122,24 +122,30 @@ const predictService = async (
         })
         .filter(({ deficit }) => typeof deficit !== "undefined");
 
-    const getDeficitForWeightDiff = (
-      goal: number,
-      intercept: number,
-      gradient: number
-    ) => {
-      // y = mx + c
-      // weightDiff = m * deficit + c
-      // (weightDiff - c) / m = deficit
-      return (goal - intercept) / gradient;
-    };
-
-    const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
-      getCombinedWeeklyValues(1),
-      parseInt(deficit),
-      ctx
+    const combinedValues = getCombinedWeeklyValues(1);
+    const linearRegressionInformation = getLinearRegressionInformation(
+      combinedValues
     );
 
-    return weeklyWeightDiffForDeficit;
+    const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
+      combinedValues,
+      parseInt(deficit),
+      ctx,
+      linearRegressionInformation
+    );
+
+    const deficitForRemainingDaysThisMonth = await predictDeficitForRemainderOfMonth(
+      ctx,
+      linearRegressionInformation.gradient,
+      linearRegressionInformation.intercept,
+      goal
+    );
+
+    return {
+      ...weeklyWeightDiffForDeficit,
+      deficitForRemainingDaysThisMonth,
+      goal,
+    };
   }
 
   if (isMonthly(resolution)) {
@@ -181,25 +187,18 @@ const predictService = async (
           };
         })
         .filter(({ deficit }) => typeof deficit !== "undefined");
-
-    const getDeficitForWeightDiff = (
-      goal: number,
-      intercept: number,
-      gradient: number
-    ) => {
-      // y = mx + c
-      // weightDiff = m * deficit + c
-      // (weightDiff - c) / m = deficit
-      return (goal - intercept) / gradient;
-    };
-
+    const combinedValues = getCombinedMonthlyValues(0);
+    const linearRegressionInformation = getLinearRegressionInformation(
+      combinedValues
+    );
     const monthlyDiffForDeficit = predictWeightDiffForDeficit(
-      getCombinedMonthlyValues(0),
+      combinedValues,
       parseInt(deficit),
-      ctx
+      ctx,
+      linearRegressionInformation
     );
 
-    return monthlyDiffForDeficit;
+    return { ...monthlyDiffForDeficit, goal };
   }
 };
 
