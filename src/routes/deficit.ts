@@ -88,7 +88,7 @@ deficitRouter.get("/deficit", async (ctx: Context) => {
       },
       fivePointMoving: {
         weightDiffKilos: weightDiff5Point.toFixed(3),
-        rSquaredValue: weightDiff5Point.toFixed(3),
+        rSquaredValue: rSquaredValue5Point.toFixed(3),
       },
     },
     deficits: deficitsCurrentMonth,
