@@ -1,7 +1,9 @@
 import {
+  getLinearRegressionInformation,
   predictWeightDiffForDeficit,
   predictService,
-} from "../../../../services/predict";
+} from "./../../../../services/predict/index";
+
 import { createMockContext } from "@shopify/jest-koa-mocks";
 import { logWarning } from "../../../../logger/warn";
 import { createMockJWT } from "../../../tools/create-mock-jwt";
@@ -13,6 +15,8 @@ let realDateNow: () => number;
 let ctx = createMockContext();
 let calMockservice;
 let weightMockService;
+let linearRegressionInformation;
+const goal = -0.25;
 beforeEach(() => {
   realDateNow = Date.now.bind(global.Date);
   // stub date to 2021-05-29, 12:00:00
@@ -23,6 +27,7 @@ beforeEach(() => {
   weightMockService.mockDefault();
   ctx = createMockContext();
   ctx.state.token = createMockJWT();
+  linearRegressionInformation = {};
 });
 
 describe("predictService", () => {
@@ -33,28 +38,33 @@ describe("predictService", () => {
   });
 
   it("should return the correct prediction given a weekly resolution", async () => {
-    const prediction = await predictService(ctx, "-1300", "weekly");
+    const prediction = await predictService(ctx, "-1300", "weekly", goal);
     expect(prediction).toEqual({
+      goal,
+      deficitForRemainingDaysThisMonth: -1725.9745676516955,
       rSquaredValue: 0.09111735235647,
       weightDiff: -0.11308176980484691,
     });
   });
 
   it("should return the correct prediction given a weekly resolution, three point weight diff average", async () => {
-    const prediction = await predictService(ctx, "-1300", "weekly", {
+    const prediction = await predictService(ctx, "-1300", "weekly", goal, {
       weightDiffMovingAverage: 3,
     });
     expect(prediction).toEqual({
+      goal,
+      deficitForRemainingDaysThisMonth: -2672.8315190983785,
       rSquaredValue: 0.06912166747487314,
       weightDiff: -0.04171263550561191,
     });
   });
 
   it("should return the correct prediction given a monthly resolution", async () => {
-    const prediction = await predictService(ctx, "-1000", "monthly");
+    const prediction = await predictService(ctx, "-1000", "monthly", goal);
     expect(prediction).toEqual({
       rSquaredValue: 0.6530176090803418,
       weightDiff: -0.7890648261106703,
+      goal,
     });
   });
 });
@@ -67,7 +77,15 @@ describe("predictWeightDiffForDeficit", () => {
       { weightDiff: "-0.125", deficit: "-450" },
     ];
     const deficit = -1345;
-    const weeklyDiff = predictWeightDiffForDeficit(weightDiff, deficit, ctx);
+    const linearRegressionInformation = getLinearRegressionInformation(
+      weightDiff
+    );
+    const weeklyDiff = predictWeightDiffForDeficit(
+      weightDiff,
+      deficit,
+      ctx,
+      linearRegressionInformation
+    );
     const expected = { rSquaredValue: 1, weightDiff: -0.3736111111111111 };
     expect(weeklyDiff).toEqual(expected);
   });
@@ -79,7 +97,15 @@ describe("predictWeightDiffForDeficit", () => {
       { weightDiff: "-0.125", deficit: undefined },
     ];
     const deficit = -1345;
-    predictWeightDiffForDeficit(NaNWeightDiff, deficit, ctx);
+    const linearRegressionInformation = getLinearRegressionInformation(
+      NaNWeightDiff
+    );
+    predictWeightDiffForDeficit(
+      NaNWeightDiff,
+      deficit,
+      ctx,
+      linearRegressionInformation
+    );
     expect(logWarning).toHaveBeenCalledTimes(2);
     expect((logWarning as jest.Mock).mock.calls[0][0]).toEqual(
       "Determined RSquared value was falsey: NaN"
@@ -94,7 +120,15 @@ describe("predictWeightDiffForDeficit", () => {
       { weightDiff: "-0.1", deficit: "-1000" },
       { weightDiff: "0.1", deficit: "-500" },
     ];
+    const linearRegressionInformation = getLinearRegressionInformation(
+      zeroWeightDiff
+    );
     const deficit = -750;
-    predictWeightDiffForDeficit(zeroWeightDiff, deficit, ctx);
+    predictWeightDiffForDeficit(
+      zeroWeightDiff,
+      deficit,
+      ctx,
+      linearRegressionInformation
+    );
   });
 });

@@ -79,4 +79,6 @@ export interface LinearRegressionInformation {
 export interface PredictionData {
   weightDiff: number;
   rSquaredValue: number;
+  goal: number;
+  deficitForRemainingDaysThisMonth?: number;
 }
