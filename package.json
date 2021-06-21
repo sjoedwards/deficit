@@ -29,7 +29,7 @@
   "scripts": {
     "test": "jest --no-cache",
     "dev": "ts-node-dev src/index.ts --rs --respawn --poll --interval 300",
-    "build": "tsc",
+    "build": "tsc src/index.ts",
     "start": "node build/src/index.js",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "lint:fix": "yarn run lint --fix"
