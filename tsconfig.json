@@ -5,7 +5,5 @@
     "target": "es5",
     "outDir": "build"
   },
-  "exclude": [
-    "client"
-]
+  "exclude": ["node_modules", "client"]
 }
