@@ -39,6 +39,9 @@
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
       "./src/test/setup.ts"
+    ],
+    "modulePathIgnorePatterns": [
+      "client"
     ]
   },
   "author": "",
