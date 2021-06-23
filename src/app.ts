@@ -11,6 +11,7 @@ import { runRouter } from "./routes/runs";
 import { macrosRouter } from "./routes/macros";
 import { caloriesRouter } from "./routes/calories";
 import { deficitRouter } from "./routes/deficit";
+import cors from "@koa/cors";
 
 config({ path: ".env" });
 
@@ -20,10 +21,8 @@ app
   .on("error", (err, ctx): void => {
     /* eslint-disable-next-line no-console */
     console.error(err, ctx.state);
-    ctx.body = {
-      message: "Uh oh, Sam messed up, tell him to fix it",
-    };
   })
+  .use(cors())
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .use(weightRouter.routes())

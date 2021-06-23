@@ -10,9 +10,13 @@ const getTokens = async (ctx: Context, accessCode: string) => {
     /* eslint-disable-next-line no-console */
     console.log("No access code, redirecting to FitBit authZ");
     ctx.cookies.set("path", ctx.path);
-    return ctx.redirect(
-      `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${process.env.FITBIT_CLIENT_ID}&scope=activity%20nutrition%20weight&redirect_uri=${redirectUri}`
-    );
+    if (ctx.req.headers.accept !== "text/html") {
+      return ctx.throw(401);
+    } else {
+      return ctx.redirect(
+        `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${process.env.FITBIT_CLIENT_ID}&scope=activity%20nutrition%20weight&redirect_uri=${redirectUri}`
+      );
+    }
   }
   const clientSecret = process.env.FITBIT_CLIENT_SECRET;
   const clientId = process.env.FITBIT_CLIENT_ID;
