@@ -4,7 +4,7 @@ import { Context, Next } from "koa";
 
 const getTokens = async (ctx: Context, accessCode: string) => {
   const redirectUri = encodeURI(
-    process.env.REDIRECT_URI || "http://localhost:3000"
+    process.env.REDIRECT_URI || "http://localhost:3000/token"
   );
   if (!accessCode) {
     /* eslint-disable-next-line no-console */

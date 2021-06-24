@@ -11,6 +11,7 @@ import { runRouter } from "./routes/runs";
 import { macrosRouter } from "./routes/macros";
 import { caloriesRouter } from "./routes/calories";
 import { deficitRouter } from "./routes/deficit";
+import { tokenRouter } from "./routes/token";
 import cors from "@koa/cors";
 
 config({ path: ".env" });
@@ -22,7 +23,7 @@ app
     /* eslint-disable-next-line no-console */
     console.error(err, ctx.state);
   })
-  .use(cors())
+  .use(cors({ credentials: true }))
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .use(weightRouter.routes())
@@ -34,6 +35,8 @@ app
   .use(caloriesRouter.routes())
   .use(caloriesRouter.allowedMethods())
   .use(deficitRouter.routes())
-  .use(deficitRouter.allowedMethods());
+  .use(deficitRouter.allowedMethods())
+  .use(tokenRouter.routes())
+  .use(tokenRouter.allowedMethods());
 
 export { app };

@@ -15,6 +15,10 @@ const getConfig = () => ({
   urls: {
     deficit: process.env.NEXT_PUBLIC_DEFICIT_URL || "",
   },
+  fitbit: {
+    clientId: process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID || "",
+    redirectUri: process.env.NEXT_PUBLIC_FITBIT_REDIRECT_URI,
+  },
 });
 const config = getConfig();
 
@@ -33,11 +37,12 @@ export default function Home() {
       try {
         const response = await axios.get(config.urls.deficit, {
           maxRedirects: 0,
+          withCredentials: true,
         });
       } catch (e) {
-        if (e.response.status === 401) {
+        if (e?.response?.status === 401) {
           Router.push(
-            `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_FITBIT_CLIENT_ID}&scope=activity%20nutrition%20weight&redirect_uri=${redirectUri}`
+            `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${config.fitbit.clientId}&scope=activity%20nutrition%20weight&redirect_uri=${config.fitbit.redirectUri}`
           );
         }
       }
