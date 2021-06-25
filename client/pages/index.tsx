@@ -22,11 +22,9 @@ const getConfig = () => ({
 });
 const config = getConfig();
 
-// const Profile = () => {
-//   if (error) return <div>failed to load</div>;
-//   if (!data) return <div>loading...</div>;
-//   return <div>hello {data.averageDeficitCurrentMonth}!</div>;
-// };
+const logError = (errorMessage: string): void => {
+  console.error(errorMessage);
+};
 
 export default function Home() {
   const redirectUri = encodeURI(
@@ -34,11 +32,17 @@ export default function Home() {
   );
   useEffect(() => {
     const getDeficit = async () => {
+      if (!config?.urls?.deficit) {
+        logError("Can't get deficit information, no URL defined");
+      }
       try {
-        const response = await axios.get(config.urls.deficit, {
-          maxRedirects: 0,
-          withCredentials: true,
-        });
+        const response = await axios.get<IDeficitResponse>(
+          config.urls.deficit,
+          {
+            maxRedirects: 0,
+            withCredentials: true,
+          }
+        );
       } catch (e) {
         if (e?.response?.status === 401) {
           Router.push(
