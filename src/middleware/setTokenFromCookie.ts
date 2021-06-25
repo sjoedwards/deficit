@@ -43,6 +43,8 @@ const setTokenFromCookieMiddleware = async (ctx: Context, next: Next) => {
       if (tokens) {
         ctx.cookies.set("accessToken", tokens.access_token, {
           maxAge: tokens.expires_in,
+          sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
+          secure: process.env.NODE_ENV === "development" ? false : true,
         });
       }
       ctx.state.token = tokens && tokens.access_token;
