@@ -15,7 +15,7 @@ import { tokenRouter } from "./routes/token";
 import cors from "@koa/cors";
 
 config({ path: ".env" });
-
+app.proxy = true;
 app
   .use(errorMiddleware)
   /* eslint-disable-next-line no-unused-vars */
