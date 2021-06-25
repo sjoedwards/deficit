@@ -10,7 +10,7 @@ const getTokens = async (ctx: Context, accessCode: string) => {
     /* eslint-disable-next-line no-console */
     console.log("No access code, redirecting to FitBit authZ");
     ctx.cookies.set("path", ctx.path);
-    if (ctx.req.headers.accept !== "text/html") {
+    if (!ctx.req.headers.accept.includes("text/html")) {
       return ctx.throw(401);
     } else {
       return ctx.redirect(
