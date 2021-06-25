@@ -1,15 +1,23 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
-  noMovingAverage: {
-    weightDiffKilos: string;
-    deficitForRemainingDaysThisMonth: string;
+  predictedWeeklyWeightDiff: {
+    noMovingAverage: {
+      weightDiffKilos: string;
+      deficitForRemainingDaysThisMonth: string;
+    };
   };
+  deficits: IDeficitApiData[];
+}
+
+interface IDeficitApiData {
+  dateTime: string;
+  deficit: string;
 }
 const getConfig = () => ({
   urls: {
@@ -30,6 +38,11 @@ export default function Home() {
   const redirectUri = encodeURI(
     process.env.NEXT_REDIRECT_URI || "http://localhost:3000"
   );
+  const [averageDeficit, setAverageDeficit] = useState("");
+  const [deficitRemaining, setAverageDeficitRemaining] = useState("");
+  const [weightDiff, setWeightDiff] = useState("");
+  const [deficits, setDeficits] = useState<never[] | IDeficitApiData[]>([]);
+
   useEffect(() => {
     const getDeficit = async () => {
       if (!config?.urls?.deficit) {
@@ -43,6 +56,18 @@ export default function Home() {
             withCredentials: true,
           }
         );
+        console.log(response);
+        const {
+          averageDeficitCurrentMonth,
+          predictedWeeklyWeightDiff,
+          deficits,
+        } = response?.data || {};
+        const { weightDiffKilos, deficitForRemainingDaysThisMonth } =
+          predictedWeeklyWeightDiff?.noMovingAverage || {};
+        setAverageDeficit(averageDeficitCurrentMonth);
+        setAverageDeficitRemaining(deficitForRemainingDaysThisMonth);
+        setWeightDiff(weightDiffKilos);
+        setDeficits(deficits);
       } catch (e) {
         if (e?.response?.status === 401) {
           Router.push(
@@ -52,7 +77,7 @@ export default function Home() {
       }
     };
     getDeficit();
-  });
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -63,7 +88,40 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>Hello world!</h1>
+        <h1 className={styles.title}>Deficit info:</h1>
+        {!averageDeficit ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <div>
+              <p>
+                You have an average daily deficit of {averageDeficit} calories
+                (averaged over days this month)
+              </p>
+            </div>
+            <div>
+              <p>
+                You are predicted to{" "}
+                {parseFloat(weightDiff) >= 0 ? "gain" : "lose"}{" "}
+                {Math.abs(parseFloat(weightDiff))} kilograms per week, based off
+                of your historic metabolic data.
+              </p>
+            </div>
+            <div>
+              <p>
+                You need a deficit of {deficitRemaining} for the rest of the
+                days this month to lose your goal of 0.25 kilos
+              </p>
+            </div>
+
+            <div>
+              <p>
+                Your deficit today is{" "}
+                {deficits?.[deficits?.length - 1]?.deficit}
+              </p>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
