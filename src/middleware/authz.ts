@@ -9,10 +9,7 @@ const getTokens = async (ctx: Context, accessCode: string) => {
   if (!accessCode) {
     /* eslint-disable-next-line no-console */
     console.log("No access code, redirecting to FitBit authZ");
-    ctx.cookies.set("path", ctx.path, {
-      sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
-      secure: process.env.NODE_ENV === "development" ? false : true,
-    });
+    ctx.cookies.set("path");
     if (!ctx.req.headers.accept.includes("text/html")) {
       return ctx.throw(401);
     } else {
@@ -56,16 +53,12 @@ const authzMiddleware = async (ctx: Context, next: Next) => {
     }
     ctx.cookies.set("accessToken", tokens.access_token, {
       maxAge: tokens.expires_in,
-      sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
-      secure: process.env.NODE_ENV === "development" ? false : true,
     });
-    ctx.cookies.set("refreshToken", tokens.refresh_token, {
-      sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
-      secure: process.env.NODE_ENV === "development" ? false : true,
-    });
+    ctx.cookies.set("refreshToken", tokens.refresh_token);
     const redirectPath = ctx.cookies.get("path") || "/auth";
     ctx.redirect(redirectPath);
   }
+
   return next();
 };
 
