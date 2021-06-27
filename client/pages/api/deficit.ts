@@ -1,6 +1,7 @@
 import axios from "axios";
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getConfig } from "../../tools/get-config";
 import { logError } from "../../tools/log-error";
 
 interface IDeficitResponse {
@@ -18,11 +19,6 @@ interface IDeficitApiData {
   dateTime: string;
   deficit: string;
 }
-const getConfig = () => ({
-  urls: {
-    deficit: process.env.NEXT_PUBLIC_DEFICIT_URL || "",
-  },
-});
 const config = getConfig();
 
 const handler = async (

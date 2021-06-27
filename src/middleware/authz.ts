@@ -44,7 +44,6 @@ const getTokens = async (ctx: Context, accessCode: string) => {
 };
 
 const authzMiddleware = async (ctx: Context, next: Next) => {
-  console.log(process.env.NODE_ENV);
   if (!ctx.state.token) {
     const accessCode = ctx.request.query.code as string;
     const tokens = await getTokens(ctx, accessCode);
@@ -54,9 +53,8 @@ const authzMiddleware = async (ctx: Context, next: Next) => {
     ctx.cookies.set("accessToken", tokens.access_token, {
       maxAge: tokens.expires_in,
     });
+    ctx.state.token = tokens && tokens.access_token;
     ctx.cookies.set("refreshToken", tokens.refresh_token);
-    const redirectPath = ctx.cookies.get("path") || "/auth";
-    ctx.redirect(redirectPath);
   }
 
   return next();
