@@ -53,8 +53,17 @@ const authzMiddleware = async (ctx: Context, next: Next) => {
     }
     ctx.cookies.set("accessToken", tokens.access_token, {
       maxAge: tokens.expires_in,
+      domain:
+        process.env.NODE_ENV === "development"
+          ? "localhost"
+          : "deficit-sjoedwards.vercel.app",
     });
-    ctx.cookies.set("refreshToken", tokens.refresh_token);
+    ctx.cookies.set("refreshToken", tokens.refresh_token, {
+      domain:
+        process.env.NODE_ENV === "development"
+          ? "localhost"
+          : "deficit-sjoedwards.vercel.app",
+    });
     const redirectPath = ctx.cookies.get("path") || "/auth";
     ctx.redirect(redirectPath);
   }
