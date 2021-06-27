@@ -43,10 +43,6 @@ const setTokenFromCookieMiddleware = async (ctx: Context, next: Next) => {
       if (tokens) {
         ctx.cookies.set("accessToken", tokens.access_token, {
           maxAge: tokens.expires_in,
-          domain:
-            process.env.NODE_ENV === "development"
-              ? "localhost"
-              : "deficit-sjoedwards.vercel.app",
         });
       }
       ctx.state.token = tokens && tokens.access_token;
