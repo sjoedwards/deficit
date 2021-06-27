@@ -3,6 +3,7 @@ import styles from "../styles/Home.module.css";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
+import { logError } from "../tools/log-error";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -30,10 +31,6 @@ const getConfig = () => ({
 });
 const config = getConfig();
 
-const logError = (errorMessage: string): void => {
-  console.error(errorMessage);
-};
-
 export default function Home() {
   const redirectUri = encodeURI(
     process.env.NEXT_REDIRECT_URI || "http://localhost:3000"
@@ -41,21 +38,16 @@ export default function Home() {
   const [averageDeficit, setAverageDeficit] = useState("");
   const [deficitRemaining, setAverageDeficitRemaining] = useState("");
   const [weightDiff, setWeightDiff] = useState("");
+  const [error, setError] = useState(false);
   const [deficits, setDeficits] = useState<never[] | IDeficitApiData[]>([]);
 
   useEffect(() => {
     const getDeficit = async () => {
-      if (!config?.urls?.deficit) {
-        logError("Can't get deficit information, no URL defined");
-      }
       try {
-        const response = await axios.get<IDeficitResponse>(
-          config.urls.deficit,
-          {
-            maxRedirects: 0,
-            withCredentials: true,
-          }
-        );
+        const response = await axios.get<IDeficitResponse>("/api/deficit", {
+          maxRedirects: 0,
+          withCredentials: true,
+        });
         console.log(response);
         const {
           averageDeficitCurrentMonth,
@@ -73,6 +65,9 @@ export default function Home() {
           Router.push(
             `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${config.fitbit.clientId}&scope=activity%20nutrition%20weight&redirect_uri=${config.fitbit.redirectUri}`
           );
+        } else {
+          logError(e);
+          setError(true);
         }
       }
     };
@@ -89,6 +84,7 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Deficit info:</h1>
+        {error && <p>Theres been an error!</p>}
         {!averageDeficit ? (
           <p>Loading...</p>
         ) : (
