@@ -1,22 +1,22 @@
+import { Cookies } from "cookies";
+import { NextHandler } from "next-connect";
+import { NextApiResponse } from "next";
+import { IExtendedRequest } from "./../../../types/index";
 import btoa from "btoa";
 import axios from "axios";
 import { Context, Next } from "koa";
 
-const getTokens = async (ctx: Context, accessCode: string) => {
+const getTokens = async (
+  req: IExtendedRequest,
+  res: NextApiResponse,
+  accessCode: string
+) => {
   const redirectUri = encodeURI(
     process.env.REDIRECT_URI || "http://localhost:3000/token"
   );
   if (!accessCode) {
     /* eslint-disable-next-line no-console */
-    console.log("No access code, redirecting to FitBit authZ");
-    ctx.cookies.set("path");
-    if (!ctx.req.headers.accept.includes("text/html")) {
-      return ctx.throw(401);
-    } else {
-      return ctx.redirect(
-        `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${process.env.FITBIT_CLIENT_ID}&scope=activity%20nutrition%20weight&redirect_uri=${redirectUri}`
-      );
-    }
+    return ctx.throw(401);
   }
   const clientSecret = process.env.FITBIT_CLIENT_SECRET;
   const clientId = process.env.FITBIT_CLIENT_ID;
@@ -43,18 +43,20 @@ const getTokens = async (ctx: Context, accessCode: string) => {
   }
 };
 
-const authzMiddleware = async (ctx: Context, next: Next) => {
-  if (!ctx.state.token) {
-    const accessCode = ctx.request.query.code as string;
-    const tokens = await getTokens(ctx, accessCode);
-    if (ctx.status === 302) {
-      return true;
-    }
-    ctx.cookies.set("accessToken", tokens.access_token, {
+const authzMiddleware = async (
+  req: IExtendedRequest,
+  res: NextApiResponse,
+  next: NextHandler
+) => {
+  const cookies = new Cookies();
+  if (!req.state.token) {
+    const accessCode = req.query.code as string;
+    const tokens = await getTokens(req, res, accessCode);
+    cookies.set("accessToken", tokens.access_token, {
       maxAge: tokens.expires_in,
     });
-    ctx.state.token = tokens && tokens.access_token;
-    ctx.cookies.set("refreshToken", tokens.refresh_token);
+    req.state.token = tokens && tokens.access_token;
+    cookies.set("refreshToken", tokens.refresh_token);
   }
 
   return next();

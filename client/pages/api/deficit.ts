@@ -4,7 +4,8 @@ import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 import { getConfig } from "../../tools/get-config";
 import { logError } from "../../tools/log-error";
 import nc, { NextConnect } from "next-connect";
-import { setTokenFromCookieMiddleware } from "../../__tests__/pages/api/middleware/setTokenFromCookie";
+import { setTokenFromCookieMiddleware } from "./middleware/setTokenFromCookie";
+import { authzMiddleware } from "./middleware/authz";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -36,7 +37,8 @@ const getDeficit = async (req: NextApiRequest) => {
   return response.data;
 };
 const handler = nc<NextApiRequest, NextApiResponse>()
-  .use(setTokenFromCookieMiddleware())
+  .use(setTokenFromCookieMiddleware)
+  .use(authzMiddleware)
   .get(async (req, res) => {
     try {
       const result = await getDeficit(req);

@@ -1,8 +1,9 @@
-import { Context, Next } from "express";
 import btoa from "btoa";
 import axios from "axios";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import Cookies from "cookies";
+import { NextHandler } from "next-connect";
+import { IExtendedRequest } from "../../../types";
 
 const refreshAccessToken = async (refreshToken: string) => {
   const clientSecret = process.env.FITBIT_CLIENT_SECRET;
@@ -30,16 +31,10 @@ const refreshAccessToken = async (refreshToken: string) => {
   }
 };
 
-interface IExtendedRequest extends NextApiRequest {
-  state: {
-    token?: string;
-  };
-}
-
 const setTokenFromCookieMiddleware = async (
   req: IExtendedRequest,
   res: NextApiResponse,
-  next: Next
+  next: NextHandler
 ) => {
   const cookies = new Cookies(req, res);
 
