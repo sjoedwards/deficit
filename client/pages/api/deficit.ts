@@ -4,8 +4,10 @@ import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 import { getConfig } from "../../tools/get-config";
 import { logError } from "../../tools/log-error";
 import nc, { NextConnect } from "next-connect";
-import { setTokenFromCookieMiddleware } from "./middleware/setTokenFromCookie";
-import { authzMiddleware } from "./middleware/authz";
+import { setTokenFromCookieMiddleware } from "../../middleware/setTokenFromCookie";
+import { authzMiddleware } from "../../middleware/authz";
+import { errorMiddleware } from "../../middleware/error";
+import { IExtendedRequest } from "../../types";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -22,10 +24,11 @@ interface IDeficitApiData {
   dateTime: string;
   deficit: string;
 }
-const config = getConfig();
 
 const getDeficit = async (req: NextApiRequest) => {
+  const config = getConfig();
   if (!config?.urls?.deficit) {
+    console.log(process.env.NEXT_PUBLIC_DEFICIT_URL);
     throw new Error(`Can't get deficit information, no URL defined`);
   }
   const cookie = req.headers.cookie;
@@ -36,7 +39,9 @@ const getDeficit = async (req: NextApiRequest) => {
   });
   return response.data;
 };
-const handler = nc<NextApiRequest, NextApiResponse>()
+const handler = nc<IExtendedRequest, NextApiResponse>({
+  onError: errorMiddleware,
+})
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .get(async (req, res) => {

@@ -1,9 +1,6 @@
+import { Context, Next } from "koa";
 import btoa from "btoa";
 import axios from "axios";
-import { NextApiResponse } from "next";
-import Cookies from "cookies";
-import { NextHandler } from "next-connect";
-import { IExtendedRequest } from "../../../types";
 
 const refreshAccessToken = async (refreshToken: string) => {
   const clientSecret = process.env.FITBIT_CLIENT_SECRET;
@@ -31,30 +28,24 @@ const refreshAccessToken = async (refreshToken: string) => {
   }
 };
 
-const setTokenFromCookieMiddleware = async (
-  req: IExtendedRequest,
-  res: NextApiResponse,
-  next: NextHandler
-) => {
-  const cookies = new Cookies(req, res);
-
-  const accessToken = await cookies.get("accessToken");
-  const refreshToken = await cookies.get("refreshToken");
+const setTokenFromCookieMiddleware = async (ctx: Context, next: Next) => {
+  const accessToken = await ctx.cookies.get("accessToken");
+  const refreshToken = await ctx.cookies.get("refreshToken");
   if (accessToken) {
     /* eslint-disable-next-line no-console */
     console.log("Token obtained from cookie");
-    req.state.token = accessToken;
+    ctx.state.token = accessToken;
   } else if (refreshToken) {
     /* eslint-disable-next-line no-console */
     console.log("Refreshing token");
     try {
       const tokens = await refreshAccessToken(refreshToken);
       if (tokens) {
-        cookies.set("accessToken", tokens.access_token, {
+        ctx.cookies.set("accessToken", tokens.access_token, {
           maxAge: tokens.expires_in,
         });
       }
-      req.state.token = tokens && tokens.access_token;
+      ctx.state.token = tokens && tokens.access_token;
     } catch (e) {
       /* eslint-disable-next-line no-console */
       console.log("Failed to refresh token");

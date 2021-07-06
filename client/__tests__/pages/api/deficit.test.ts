@@ -25,7 +25,7 @@ afterEach(() => {
 });
 
 describe("Deficit handler", () => {
-  test.only("responds 401 to unauth'd  GET", async () => {
+  test("responds 401 to unauth'd  GET", async () => {
     const client = await testClient(deficitHandler);
     const response = await client.get("/api/deficit");
     expect(response.status).toBe(401);

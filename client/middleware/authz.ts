@@ -1,7 +1,7 @@
-import { Cookies } from "cookies";
+import Cookies from "cookies";
 import { NextHandler } from "next-connect";
 import { NextApiResponse } from "next";
-import { IExtendedRequest } from "./../../../types/index";
+import { IExtendedRequest } from "../types/index";
 import btoa from "btoa";
 import axios from "axios";
 import { Context, Next } from "koa";
@@ -48,8 +48,10 @@ const authzMiddleware = async (
   res: NextApiResponse,
   next: NextHandler
 ) => {
+  console.log(1);
   const cookies = new Cookies();
   if (!req.state.token) {
+    console.log(2);
     const accessCode = req.query.code as string;
     const tokens = await getTokens(req, res, accessCode);
     cookies.set("accessToken", tokens.access_token, {
