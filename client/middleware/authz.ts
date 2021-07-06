@@ -16,7 +16,7 @@ const getTokens = async (
   );
   if (!accessCode) {
     /* eslint-disable-next-line no-console */
-    return ctx.throw(401);
+    return res.status(401).end();
   }
   const clientSecret = process.env.FITBIT_CLIENT_SECRET;
   const clientId = process.env.FITBIT_CLIENT_ID;
@@ -48,19 +48,16 @@ const authzMiddleware = async (
   res: NextApiResponse,
   next: NextHandler
 ) => {
-  console.log(1);
-  const cookies = new Cookies();
-  if (!req.state.token) {
-    console.log(2);
-    const accessCode = req.query.code as string;
+  const cookies = new Cookies(req, res);
+  if (!req?.state?.token) {
+    const accessCode = req?.query?.code as string;
     const tokens = await getTokens(req, res, accessCode);
     cookies.set("accessToken", tokens.access_token, {
       maxAge: tokens.expires_in,
     });
-    req.state.token = tokens && tokens.access_token;
+    req.state = { ...req.state, token: tokens && tokens.access_token };
     cookies.set("refreshToken", tokens.refresh_token);
   }
-
   return next();
 };
 

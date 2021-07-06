@@ -1,20 +1,18 @@
+import { AxiosError } from "axios";
 import { Next, Context } from "koa";
 import { NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
+import { logError } from "../tools/log-error";
 import { IExtendedRequest } from "../types";
 
 const errorMiddleware = async (
-  err: Error,
+  err: AxiosError,
   req: IExtendedRequest,
   res: NextApiResponse,
   next: NextHandler
 ) => {
-  try {
-    await next();
-  } catch (err) {
-    res.status = err.status || 500;
-    res.end("An error has occured");
-  }
+  logError(`${err}`);
+  res.status(500).end();
 };
 
 export { errorMiddleware };
