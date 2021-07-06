@@ -12,7 +12,7 @@ const getTokens = async (
   accessCode: string
 ) => {
   const redirectUri = encodeURI(
-    process.env.REDIRECT_URI || "http://localhost:3000/token"
+    process.env.REDIRECT_URI || "http://localhost:3001/token"
   );
   if (!accessCode) {
     /* eslint-disable-next-line no-console */
