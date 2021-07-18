@@ -1,5 +1,5 @@
 import moment from "moment";
-import { FitbitDailyCaloriesData } from "./../../types/index";
+import { FitbitDailyCaloriesData } from "./../types/index";
 
 const groupIntoMonthlyCalories = (
   apiCalories: Array<FitbitDailyCaloriesData>
