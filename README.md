@@ -9,5 +9,4 @@
 
 ## Environments
 
-https://deficit.herokuapp.com/deficit
 https://deficit-sjoedwards.vercel.app
