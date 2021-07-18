@@ -76,6 +76,8 @@ export interface FitbitActivityData {
 
 export type ResolutionNames = "daily" | "weekly" | "monthly";
 
+export type EResolutionNames = "daily" | "weekly" | "monthly";
+
 export interface DeficitGoalData {
   weightDiff?: string;
   deficit?: string;
