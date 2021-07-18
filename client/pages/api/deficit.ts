@@ -1,10 +1,8 @@
 import { deficitService } from "../../services/deficit";
 import axios from "axios";
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { getConfig } from "../../tools/get-config";
-import { logError } from "../../tools/log-error";
-import nc, { NextConnect } from "next-connect";
+import nc from "next-connect";
 import { setTokenFromCookieMiddleware } from "../../middleware/setTokenFromCookie";
 import { authzMiddleware } from "../../middleware/authz";
 import { errorMiddleware } from "../../middleware/error";

@@ -1,7 +1,6 @@
 import { isResolution } from "./../../../tools/is-resolution";
 import createHTTPError from "http-errors";
-import { ResolutionNames } from "../../../types/index";
-import { weightService } from "../../../services/weight";
+import { caloriesService } from "../../../services/calories";
 import type { NextApiResponse } from "next";
 import nc from "next-connect";
 import { setTokenFromCookieMiddleware } from "../../../middleware/setTokenFromCookie";
@@ -18,7 +17,7 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
     const resolution = req?.query?.resolution as string;
 
     if (isResolution(resolution)) {
-      const result = await weightService(resolution, req, 1);
+      const result = await caloriesService(resolution, req, res);
       res.json(result);
     } else {
       throw new createHTTPError[400]("Resolution not supported");
