@@ -1,6 +1,5 @@
 import { NextApiResponse } from "next";
 import { IExtendedRequest } from "./../../types/index";
-import { Context } from "koa";
 import moment from "moment";
 import { getDeficitForWeightDiff } from "../../tools/get-deficit-for-weight-diff";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";

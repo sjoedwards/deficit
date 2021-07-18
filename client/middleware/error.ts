@@ -1,5 +1,3 @@
-import { AxiosError } from "axios";
-import { Next, Context } from "koa";
 import { NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
 import { logError } from "../tools/log-error";

@@ -8,7 +8,6 @@ import {
   FitbitMonthlyCaloriesData,
 } from "../../types/index";
 
-import { Context } from "koa";
 import axios from "axios";
 import moment from "moment";
 import { cache } from "../../cache";

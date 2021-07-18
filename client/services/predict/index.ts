@@ -9,7 +9,6 @@ import {
 } from "../../types";
 
 import { weightService } from "../weight";
-import { Context } from "koa";
 import {
   linearRegression,
   linearRegressionLine,

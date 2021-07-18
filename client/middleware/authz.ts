@@ -4,7 +4,6 @@ import { NextApiResponse } from "next";
 import { IExtendedRequest } from "../types/index";
 import btoa from "btoa";
 import axios from "axios";
-import { Context, Next } from "koa";
 import createHTTPError from "http-errors";
 import { logWarning } from "../tools/log-warning";
 
