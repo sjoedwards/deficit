@@ -1,6 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
 import { logError } from "../tools/log-error";
@@ -31,10 +31,7 @@ const getConfig = () => ({
 });
 const config = getConfig();
 
-export default function Home() {
-  const redirectUri = encodeURI(
-    process.env.NEXT_REDIRECT_URI || "http://localhost:3000"
-  );
+export default function Home(): ReactElement {
   const [averageDeficit, setAverageDeficit] = useState("");
   const [deficitRemaining, setAverageDeficitRemaining] = useState("");
   const [weightDiff, setWeightDiff] = useState("");

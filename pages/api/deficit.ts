@@ -1,9 +1,10 @@
+import { deficitService } from "../../services/deficit";
+import type { NextApiResponse } from "next";
 import nc from "next-connect";
-import { IExtendedRequest } from "./../../types/index";
-import { NextApiRequest, NextApiResponse } from "next";
-import { errorMiddleware } from "../../middleware/error";
 import { setTokenFromCookieMiddleware } from "../../middleware/setTokenFromCookie";
 import { authzMiddleware } from "../../middleware/authz";
+import { errorMiddleware } from "../../middleware/error";
+import { IExtendedRequest } from "../../types";
 
 const handler = nc<IExtendedRequest, NextApiResponse>({
   onError: errorMiddleware,
@@ -11,7 +12,8 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .get(async (req, res) => {
-    res.redirect("/");
+    const result = await deficitService(req, res);
+    res.json(result);
   });
 
 export default handler;

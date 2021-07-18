@@ -1,6 +1,5 @@
 import { isResolution } from "./../../../tools/is-resolution";
 import createHTTPError from "http-errors";
-import { ResolutionNames } from "../../../types/index";
 import { weightService } from "../../../services/weight";
 import type { NextApiResponse } from "next";
 import nc from "next-connect";

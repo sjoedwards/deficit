@@ -1,9 +1,6 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
   "extends": [
-    "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:react/recommended",
@@ -11,9 +8,8 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
+    "next",
+    "next/core-web-vitals",
     "plugin:prettier/recommended"
-  ],
-  "rules": {
-    "@typescript-eslint/ban-ts-comment": "off"
-  }
+  ]
 }

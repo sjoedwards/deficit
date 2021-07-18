@@ -1,3 +1,15 @@
+import { NextApiRequest } from "next";
+
+export interface IExtendedRequest extends NextApiRequest {
+  state?: {
+    token?: string;
+    data?: {
+      calories?: FitbitMonthlyCaloriesData[] | FitbitWeeklyCaloriesData[];
+      weight?: FitbitMonthlyWeightData[] | FitbitWeeklyWeightData[];
+    };
+  };
+}
+
 export interface FitbitDailyCaloriesData {
   dateTime: string;
   calories: string;
@@ -64,9 +76,11 @@ export interface FitbitActivityData {
 
 export type ResolutionNames = "daily" | "weekly" | "monthly";
 
+export type EResolutionNames = "daily" | "weekly" | "monthly";
+
 export interface DeficitGoalData {
-  weightDiff: string;
-  deficit: string;
+  weightDiff?: string;
+  deficit?: string;
 }
 
 export interface LinearRegressionInformation {
@@ -82,3 +96,11 @@ export interface PredictionData {
   goal: number;
   deficitForRemainingDaysThisMonth?: number;
 }
+
+export type WeightResolutionType<T> = T extends "daily"
+  ? FitbitDailyWeightData[]
+  : T extends "weekly"
+  ? FitbitWeeklyWeightData[]
+  : T extends "monthly"
+  ? FitbitMonthlyWeightData[]
+  : never;
