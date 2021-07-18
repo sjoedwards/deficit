@@ -1,0 +1,28 @@
+const weeklyWeightExpectedResponse = [
+  { weight: "91.5", weekEnd: "2020-12-13" },
+  { weight: "91.6", weekEnd: "2020-12-20" },
+  { weight: "91.5", weekEnd: "2021-01-03" },
+  { weight: "90.8", weekEnd: "2021-01-10" },
+  { weight: "91.2", weekEnd: "2021-01-17" },
+  { weight: "91.5", weekEnd: "2021-01-24" },
+  { weight: "91.8", weekEnd: "2021-01-31" },
+  { weight: "93.3", weekEnd: "2021-02-07" },
+  { weight: "93.4", weekEnd: "2021-02-14" },
+  { weight: "92.6", weekEnd: "2021-02-21" },
+  { weight: "92.8", weekEnd: "2021-02-28" },
+  { weight: "92.8", weekEnd: "2021-03-07" },
+  { weight: "92.6", weekEnd: "2021-03-14" },
+  { weight: "91.9", weekEnd: "2021-03-21" },
+  { weight: "91.8", weekEnd: "2021-03-28" },
+  { weight: "91.9", weekEnd: "2021-04-04" },
+  { weight: "91.9", weekEnd: "2021-04-11" },
+  { weight: "91.3", weekEnd: "2021-04-18" },
+  { weight: "91.3", weekEnd: "2021-04-25" },
+  { weight: "91.8", weekEnd: "2021-05-02" },
+  { weight: "91.6", weekEnd: "2021-05-09" },
+  { weight: "92.5", weekEnd: "2021-05-16" },
+  { weight: "91.7", weekEnd: "2021-05-23" },
+  { weight: "92.0", weekEnd: "2021-05-30" },
+];
+
+export { weeklyWeightExpectedResponse };

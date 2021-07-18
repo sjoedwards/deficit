@@ -1,5 +1,5 @@
-const logError = (errorMessage: string): void => {
-  console.error(errorMessage);
+const logError = (error: Error): void => {
+  console.error(error);
 };
 
 export { logError };

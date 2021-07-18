@@ -1,8 +1,14 @@
+import { deficitService } from "../../services/deficit";
 import axios from "axios";
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 import { getConfig } from "../../tools/get-config";
 import { logError } from "../../tools/log-error";
+import nc, { NextConnect } from "next-connect";
+import { setTokenFromCookieMiddleware } from "../../middleware/setTokenFromCookie";
+import { authzMiddleware } from "../../middleware/authz";
+import { errorMiddleware } from "../../middleware/error";
+import { IExtendedRequest } from "../../types";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -19,34 +25,28 @@ interface IDeficitApiData {
   dateTime: string;
   deficit: string;
 }
-const config = getConfig();
 
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-): Promise<IDeficitResponse | void> => {
-  const getDeficit = async () => {
-    if (!config?.urls?.deficit) {
-      throw new Error(`Can't get deficit information, no URL defined`);
-    }
-    const cookie = req.headers.cookie;
-    const headers = cookie ? { cookie } : {};
-
-    const response = await axios.get<IDeficitResponse>(config.urls.deficit, {
-      headers,
-    });
-    return response.data;
-  };
-  try {
-    const result = await getDeficit();
-    res.json(result);
-  } catch (e) {
-    if (e?.response?.status === 401) {
-      return res.status(401).end();
-    }
-    logError(e);
-    return res.status(500).end();
+const getDeficit = async (req: NextApiRequest) => {
+  const config = getConfig();
+  if (!config?.urls?.deficit) {
+    throw new Error(`Can't get deficit information, no URL defined`);
   }
+  const cookie = req.headers.cookie;
+  const headers = cookie ? { cookie } : {};
+
+  const response = await axios.get<IDeficitResponse>(config.urls.deficit, {
+    headers,
+  });
+  return response.data;
 };
+const handler = nc<IExtendedRequest, NextApiResponse>({
+  onError: errorMiddleware,
+})
+  .use(setTokenFromCookieMiddleware)
+  .use(authzMiddleware)
+  .get(async (req, res) => {
+    const result = await deficitService(req, res);
+    res.json(result);
+  });
 
 export default handler;
