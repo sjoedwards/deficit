@@ -13,6 +13,7 @@
     "@types/cookies": "^0.7.6",
     "@types/jsonwebtoken": "^8.5.4",
     "axios": "^0.21.1",
+    "btoa": "^1.2.1",
     "cookies": "^0.8.0",
     "http-errors": "^1.8.0",
     "jsonwebtoken": "^8.5.1",
