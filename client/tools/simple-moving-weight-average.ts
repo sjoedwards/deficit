@@ -1,4 +1,4 @@
-import { FitbitWeeklyWeightData } from "../../../types";
+import { FitbitWeeklyWeightData } from "../../types";
 
 const simpleMovingWeightAverage = (
   weights: FitbitWeeklyWeightData[],

@@ -1,6 +1,4 @@
 const deficitExpectedResponse = {
-  message:
-    "At your daily deficit of -1095 calories (averaged over days this month), you are predicted to lose 0.044 kilograms per week, based off of your historic metabolic data. You need to average -1726 calories a day for the rest of the month.",
   averageDeficitCurrentMonth: "-1095",
   predictedWeeklyWeightDiff: {
     noMovingAverage: {

@@ -9,7 +9,6 @@ interface Mock {
 
 const calorieMock = (mock?: MockAdapter): Mock => {
   const _mock = mock || new MockAdapter(axios);
-
   return {
     get: () => _mock,
     mockDefault: () => {

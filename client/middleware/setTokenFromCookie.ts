@@ -6,7 +6,7 @@ import { NextHandler } from "next-connect";
 import { IExtendedRequest } from "../types";
 
 const refreshAccessToken = async (refreshToken: string) => {
-  const clientSecret = process.env.FITBIT_CLIENT_SECRET;
+  const clientSecret = process.env.NEXT_FITBIT_CLIENT_SECRET;
   const clientId = process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID;
   const authString = btoa(`${clientId}:${clientSecret}`);
   const headers = {
@@ -40,6 +40,7 @@ const setTokenFromCookieMiddleware = async (
 
   const accessToken = await cookies.get("accessToken");
   const refreshToken = await cookies.get("refreshToken");
+
   if (accessToken) {
     /* eslint-disable-next-line no-console */
     console.log("Token obtained from cookie");
@@ -60,6 +61,9 @@ const setTokenFromCookieMiddleware = async (
       console.log("Failed to refresh token");
       /* eslint-disable-next-line no-console */
       console.log(e && e.response && e.response.data);
+      cookies.set("refreshToken", "", {
+        maxAge: 0,
+      });
     }
   }
   return next();

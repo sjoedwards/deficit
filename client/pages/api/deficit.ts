@@ -1,3 +1,4 @@
+import { deficitService } from "../../services/deficit";
 import axios from "axios";
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
@@ -28,7 +29,6 @@ interface IDeficitApiData {
 const getDeficit = async (req: NextApiRequest) => {
   const config = getConfig();
   if (!config?.urls?.deficit) {
-    console.log(process.env.NEXT_PUBLIC_DEFICIT_URL);
     throw new Error(`Can't get deficit information, no URL defined`);
   }
   const cookie = req.headers.cookie;
@@ -45,16 +45,8 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .get(async (req, res) => {
-    try {
-      const result = await getDeficit(req);
-      res.json(result);
-    } catch (e) {
-      if (e?.response?.status === 401) {
-        return res.status(401).end();
-      }
-      logError(e);
-      return res.status(500).end();
-    }
+    const result = await deficitService(req, res);
+    res.json(result);
   });
 
 export default handler;

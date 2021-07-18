@@ -18,7 +18,7 @@ const getTokens = async (ctx: Context, accessCode: string) => {
       );
     }
   }
-  const clientSecret = process.env.FITBIT_CLIENT_SECRET;
+  const clientSecret = process.env.NEXT_FITBIT_CLIENT_SECRET;
   const clientId = process.env.FITBIT_CLIENT_ID;
   const authString = btoa(`${clientId}:${clientSecret}`);
   const headers = {

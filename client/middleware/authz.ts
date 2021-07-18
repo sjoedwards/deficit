@@ -5,6 +5,8 @@ import { IExtendedRequest } from "../types/index";
 import btoa from "btoa";
 import axios from "axios";
 import { Context, Next } from "koa";
+import createHTTPError from "http-errors";
+import { logWarning } from "../tools/log-warning";
 
 const getTokens = async (
   req: IExtendedRequest,
@@ -12,14 +14,15 @@ const getTokens = async (
   accessCode: string
 ) => {
   const redirectUri = encodeURI(
-    process.env.REDIRECT_URI || "http://localhost:3001/token"
+    process.env.NEXT_PUBLIC_FITBIT_REDIRECT_URI || "http://localhost:3001/token"
   );
   if (!accessCode) {
     /* eslint-disable-next-line no-console */
-    return res.status(401).end();
+    logWarning("No access code, returning unauthorized", req);
+    throw new createHTTPError[401]();
   }
-  const clientSecret = process.env.FITBIT_CLIENT_SECRET;
-  const clientId = process.env.FITBIT_CLIENT_ID;
+  const clientSecret = process.env.NEXT_FITBIT_CLIENT_SECRET;
+  const clientId = process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID;
   const authString = btoa(`${clientId}:${clientSecret}`);
   const headers = {
     Authorization: `Basic ${authString}`,
