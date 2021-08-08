@@ -77,17 +77,6 @@ const getFitbitService = () => {
         ({ value }: FitbitData) => parseInt(value) !== 0
       );
     },
-    async getAccessToken(
-      req: IExtendedRequest,
-      period = "6m",
-      options: IFitbitOptions = { headers: {} }
-    ): Promise<Array<FitbitData>> {
-      const activityCaloriesResponse = await getFitbitData(
-        req,
-        `https://api.fitbit.com/1/user/-/activities/calories/date/today/${period}.json`,
-        options?.headers
-      );
-    },
   };
 };
 
