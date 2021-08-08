@@ -76,8 +76,6 @@ export interface FitbitActivityData {
 
 export type ResolutionNames = "daily" | "weekly" | "monthly";
 
-export type EResolutionNames = "daily" | "weekly" | "monthly";
-
 export interface DeficitGoalData {
   weightDiff?: string;
   deficit?: string;
@@ -104,3 +102,12 @@ export type WeightResolutionType<T> = T extends "daily"
   : T extends "monthly"
   ? FitbitMonthlyWeightData[]
   : never;
+
+export enum EMethod {
+  GET = "GET",
+  POST = "POST",
+}
+
+export interface IFitbitOptions {
+  headers: {};
+}
