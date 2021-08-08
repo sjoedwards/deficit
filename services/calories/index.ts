@@ -8,9 +8,9 @@ import {
   FitbitMonthlyCaloriesData,
 } from "../../types/index";
 
-import axios from "axios";
 import moment from "moment";
 import { cache } from "../../cache";
+import { fitbitService } from "../fitbit";
 
 const getMonthlyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
@@ -76,25 +76,12 @@ export const getCalories = async (
   const headers = {
     Authorization: `Bearer ${request?.state?.token}`,
   };
-  const caloriesResponse: Array<FitbitData> = (
-    await axios({
-      url: `https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/6m.json`,
-      method: "get",
-      headers,
-    })
-  ).data["foods-log-caloriesIn"].filter(
-    ({ value }: FitbitData) => parseInt(value) !== 0
+  const caloriesResponse: Array<FitbitData> = await fitbitService.getCaloriesIn(
+    request
   );
 
-  const activityCaloriesResponse: Array<FitbitData> = (
-    await axios({
-      url: `https://api.fitbit.com/1/user/-/activities/calories/date/today/6m.json`,
-      method: "get",
-      headers,
-    })
-  ).data["activities-calories"].filter(
-    ({ value }: FitbitData) => parseInt(value) !== 0
-  );
+  const activityCaloriesResponse: Array<FitbitData> =
+    await fitbitService.getActivityCalories(request);
 
   const calories = activityCaloriesResponse.map(
     ({ dateTime, value: activityCalories }) => {

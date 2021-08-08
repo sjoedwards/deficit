@@ -3,6 +3,7 @@ import httpErrors from "http-errors";
 import {
   APIFitbitWeightData,
   EMethod,
+  FitbitData,
   IExtendedRequest,
   IFitbitOptions,
 } from "../../types";
@@ -36,6 +37,7 @@ const getFitbitService = () => {
     async getWeight(
       req: IExtendedRequest,
       baseDate: string,
+      period = "1m",
       options: IFitbitOptions = { headers: {} }
     ): Promise<Array<APIFitbitWeightData>> {
       if (!baseDate) {
@@ -43,10 +45,38 @@ const getFitbitService = () => {
       }
       const weightData = await getFitbitData(
         req,
-        `body/log/weight/date/${baseDate}/1m.json`,
+        `body/log/weight/date/${baseDate}/${period}.json`,
         options?.headers
       );
       return weightData?.data?.weight;
+    },
+    async getCaloriesIn(
+      req: IExtendedRequest,
+      period = "6m",
+      options: IFitbitOptions = { headers: {} }
+    ): Promise<Array<FitbitData>> {
+      const caloriesInResponse = await getFitbitData(
+        req,
+        `foods/log/caloriesIn/date/today/${period}.json`,
+        options?.headers
+      );
+      return caloriesInResponse?.data["foods-log-caloriesIn"].filter(
+        ({ value }: FitbitData) => parseInt(value) !== 0
+      );
+    },
+    async getActivityCalories(
+      req: IExtendedRequest,
+      period = "6m",
+      options: IFitbitOptions = { headers: {} }
+    ): Promise<Array<FitbitData>> {
+      const activityCaloriesResponse = await getFitbitData(
+        req,
+        `activities/calories/date/today/${period}.json`,
+        options?.headers
+      );
+      return activityCaloriesResponse?.data["activities-calories"].filter(
+        ({ value }: FitbitData) => parseInt(value) !== 0
+      );
     },
   };
 };
