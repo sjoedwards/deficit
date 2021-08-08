@@ -12,20 +12,19 @@ const getFitbitService = () => {
   const fitbitErrorMap = {
     401: httpErrors[401],
   };
-  const getFitbitBaseUrl = (): string => "https://api.fitbit.com/1/user/-";
   const getDefaultHeaders = (request: IExtendedRequest) => ({
     Authorization: `Bearer ${request?.state?.token}`,
   });
 
   const getFitbitData = async (
     request: IExtendedRequest,
-    path: string,
+    url: string,
     headers?: Record<string, string>,
     method: EMethod = EMethod.GET
   ) => {
     const defaultHeaders = getDefaultHeaders(request);
     return await axios({
-      url: `${getFitbitBaseUrl()}/${path}`,
+      url,
       method,
       headers: {
         ...defaultHeaders,
@@ -45,7 +44,7 @@ const getFitbitService = () => {
       }
       const weightData = await getFitbitData(
         req,
-        `body/log/weight/date/${baseDate}/${period}.json`,
+        `https://api.fitbit.com/1/user/-/body/log/weight/date/${baseDate}/${period}.json`,
         options?.headers
       );
       return weightData?.data?.weight;
@@ -57,7 +56,7 @@ const getFitbitService = () => {
     ): Promise<Array<FitbitData>> {
       const caloriesInResponse = await getFitbitData(
         req,
-        `foods/log/caloriesIn/date/today/${period}.json`,
+        `https://api.fitbit.com/1/user/-/foods/log/caloriesIn/date/today/${period}.json`,
         options?.headers
       );
       return caloriesInResponse?.data["foods-log-caloriesIn"].filter(
@@ -71,11 +70,22 @@ const getFitbitService = () => {
     ): Promise<Array<FitbitData>> {
       const activityCaloriesResponse = await getFitbitData(
         req,
-        `activities/calories/date/today/${period}.json`,
+        `https://api.fitbit.com/1/user/-/activities/calories/date/today/${period}.json`,
         options?.headers
       );
       return activityCaloriesResponse?.data["activities-calories"].filter(
         ({ value }: FitbitData) => parseInt(value) !== 0
+      );
+    },
+    async getAccessToken(
+      req: IExtendedRequest,
+      period = "6m",
+      options: IFitbitOptions = { headers: {} }
+    ): Promise<Array<FitbitData>> {
+      const activityCaloriesResponse = await getFitbitData(
+        req,
+        `https://api.fitbit.com/1/user/-/activities/calories/date/today/${period}.json`,
+        options?.headers
       );
     },
   };
