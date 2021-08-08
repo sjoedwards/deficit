@@ -107,3 +107,7 @@ export enum EMethod {
   GET = "GET",
   POST = "POST",
 }
+
+export interface IFitbitOptions {
+  headers: {};
+}

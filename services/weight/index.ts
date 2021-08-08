@@ -10,13 +10,11 @@ import {
   APIFitbitWeightData,
 } from "./../../types/index";
 import { cache } from "../../cache";
+import { fitbitService } from "../fitbit";
 
 const getWeight = async (
   request: IExtendedRequest
 ): Promise<Array<FitbitDailyWeightData>> => {
-  const headers = {
-    Authorization: `Bearer ${request?.state?.token}`,
-  };
   const getDatesForNMonthsAgo = (monthsAgo: number) => {
     return Array.from({ length: monthsAgo }, (_, index) => {
       return moment()
@@ -28,15 +26,9 @@ const getWeight = async (
 
   const weightResponse: Array<APIFitbitWeightData> = (
     await Promise.all(
-      getDatesForNMonthsAgo(6).map(async (baseDate: string) => {
-        return (
-          await axios({
-            url: `https://api.fitbit.com/1/user/-/body/log/weight/date/${baseDate}/1m.json`,
-            method: "get",
-            headers,
-          })
-        )?.data?.weight;
-      })
+      getDatesForNMonthsAgo(6).map(async (baseDate: string) =>
+        fitbitService.getWeight(request, baseDate)
+      )
     )
   )
     .reduce(
