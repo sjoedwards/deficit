@@ -116,7 +116,6 @@ const getWeeklyCalories = async (
       const caloriesForWeek = apiCalories.filter(
         (entry) => moment(entry.dateTime).locale("en-gb").week() === week
       );
-      logDebug(`calories for week ${week}: ${JSON.stringify(caloriesForWeek)}`);
       return caloriesForWeek;
     })
     .map((weeklyCalories) => {
