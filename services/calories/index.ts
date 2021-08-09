@@ -11,6 +11,7 @@ import {
 import moment from "moment";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
+import { logDebug } from "../../tools/log-debug";
 
 const getMonthlyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
@@ -111,11 +112,13 @@ const getWeeklyCalories = async (
     })
     .filter((value, index, self) => self.indexOf(value) === index)
     // Nested array of entries for each week
-    .map((week) =>
-      apiCalories.filter(
+    .map((week) => {
+      const caloriesForWeek = apiCalories.filter(
         (entry) => moment(entry.dateTime).locale("en-gb").week() === week
-      )
-    )
+      );
+      logDebug(`calories for week ${week}: ${JSON.stringify(caloriesForWeek)}`);
+      return caloriesForWeek;
+    })
     .map((weeklyCalories) => {
       const averageCalories = {
         // Reduce each week to a single value
