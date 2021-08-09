@@ -1,3 +1,4 @@
+import { updateWeekStartDay } from "./../../../tools/update-week-start-day";
 import { isResolution } from "./../../../tools/is-resolution";
 import createHTTPError from "http-errors";
 import { weightService } from "../../../services/weight";
@@ -14,6 +15,7 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .get(async (req, res) => {
+    updateWeekStartDay(1);
     const resolution = req?.query?.resolution as string;
 
     if (isResolution(resolution)) {
