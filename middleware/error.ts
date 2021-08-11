@@ -1,3 +1,4 @@
+import axios from "axios";
 import { NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
 import { logError } from "../tools/log-error";
@@ -10,7 +11,11 @@ const errorMiddleware = async (
   res: NextApiResponse,
   next: NextHandler
 ) => {
-  logError(err);
+  if (axios.isAxiosError(err)) {
+    logError(JSON.stringify(err?.response?.data?.errors));
+  } else {
+    logError(err?.message ?? "An unknown error occured");
+  }
   if (httpErrors.isHttpError(err)) {
     return res.status(err.status).end();
   }

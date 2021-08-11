@@ -21,7 +21,15 @@ const authMock = (mock?: MockAdapter): Mock => {
       });
     },
     mockFailure: () => {
-      _mock.onPost(_refreshUrl).reply(500);
+      _mock.onPost(_refreshUrl).reply(500, {
+        errors: [
+          {
+            errorType: "invalid_client",
+            message: "Refresh Token Error",
+          },
+        ],
+        success: false,
+      });
     },
   };
 };
