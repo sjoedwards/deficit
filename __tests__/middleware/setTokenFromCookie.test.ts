@@ -6,6 +6,9 @@ import { createMockJWT } from "./../utils/create-mock-jwt";
 import { calorieMock } from "../pages/api/api-data/calories/mock-default-calorie-data";
 import { weightMock } from "../pages/api/api-data/weight/mock-default-weight-data";
 import { authMock } from "../pages/api/api-data/auth/mock-default-auth-mock";
+import { logError } from "../../tools/log-error";
+
+jest.mock("../../tools/log-error");
 
 let realDateNow: () => number;
 const mock = new MockAdapter(axios);
@@ -27,6 +30,7 @@ beforeEach(() => {
 afterEach(() => {
   calMockservice.get().resetHistory();
   global.Date.now = realDateNow;
+  jest.resetAllMocks();
 });
 describe("setTokenFromCookie", () => {
   test("adds access & refresh tokens if call to refresh succeeds", async () => {
@@ -46,5 +50,14 @@ describe("setTokenFromCookie", () => {
       .set("Cookie", `refreshToken=${createMockJWT()}`);
     expect(response.header["set-cookie"][0]).toMatch("refreshToken=;");
     expect(response.status).toBe(401);
+  });
+
+  test("logs the exception if call to refresh fails", async () => {
+    authMockService.mockFailure();
+    const client = await testClient(deficitHandler);
+    await client.get("/api/").set("Cookie", `refreshToken=${createMockJWT()}`);
+    expect(logError).toHaveBeenCalledWith(
+      `Call to fitbit token endpoint failed: [{\"errorType\":\"invalid_client\",\"message\":\"Refresh Token Error\"}]`
+    );
   });
 });

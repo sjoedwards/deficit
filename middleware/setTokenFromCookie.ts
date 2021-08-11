@@ -4,7 +4,8 @@ import { NextApiResponse } from "next";
 import Cookies from "cookies";
 import { NextHandler } from "next-connect";
 import { IExtendedRequest } from "../types";
-
+import { logDebug } from "../tools/log-debug";
+import { logError } from "../tools/log-error";
 const refreshAccessToken = async (refreshToken: string) => {
   const clientSecret = process.env.NEXT_FITBIT_CLIENT_SECRET;
   const clientId = process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID;
@@ -20,13 +21,16 @@ const refreshAccessToken = async (refreshToken: string) => {
       headers,
     });
     /* eslint-disable-next-line no-console */
-    console.log("Successfully obtained token");
-    return response && response.data;
+    logDebug("Successfully obtained token");
+    return response.data;
   } catch (e) {
-    /* eslint-disable-next-line no-console */
-    console.log("Failed to obtain token");
-    /* eslint-disable-next-line no-console */
-    console.log(e && e.response && e.response.data);
+    if (axios.isAxiosError(e)) {
+      logError(
+        `Call to fitbit token endpoint failed: ${JSON.stringify(
+          e?.response?.data?.errors
+        )}`
+      );
+    }
     throw e;
   }
 };
@@ -42,12 +46,10 @@ const setTokenFromCookieMiddleware = async (
   const refreshToken = await cookies.get("refreshToken");
 
   if (accessToken) {
-    /* eslint-disable-next-line no-console */
-    console.log("Token obtained from cookie");
+    logDebug("Token obtained from cookie");
     req.state = { ...req.state, token: accessToken };
   } else if (refreshToken) {
-    /* eslint-disable-next-line no-console */
-    console.log("Refreshing token");
+    logDebug("Refreshing token");
     try {
       const tokens = await refreshAccessToken(refreshToken);
       if (tokens) {
@@ -57,10 +59,6 @@ const setTokenFromCookieMiddleware = async (
       }
       req.state = { ...req.state, token: tokens && tokens.access_token };
     } catch (e) {
-      /* eslint-disable-next-line no-console */
-      console.log("Failed to refresh token");
-      /* eslint-disable-next-line no-console */
-      console.log(e && e.response && e.response.data);
       cookies.set("refreshToken", "", {
         maxAge: 0,
       });

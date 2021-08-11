@@ -1,4 +1,4 @@
-const logError = (error: Error): void => {
+const logError = (error: string): void => {
   console.error(error);
 };
 
