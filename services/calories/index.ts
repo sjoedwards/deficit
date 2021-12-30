@@ -167,6 +167,8 @@ type ResolutionType<T> = T extends "daily"
   ? FitbitWeeklyCaloriesData[]
   : T extends "monthly"
   ? FitbitMonthlyCaloriesData[]
+  : T extends "quarterly"
+  ? FitbitMonthlyCaloriesData[]
   : never;
 
 export const caloriesService = async <T extends ResolutionNames>(
@@ -199,6 +201,10 @@ export const caloriesService = async <T extends ResolutionNames>(
     ): Promise<Array<FitbitWeeklyCaloriesData>> =>
       await getWeeklyCalories(calories),
     monthly: async (
+      calories: Array<FitbitDailyCaloriesData>
+    ): Promise<Array<FitbitMonthlyCaloriesData>> =>
+      await getMonthlyCalories(calories),
+    quarterly: async (
       calories: Array<FitbitDailyCaloriesData>
     ): Promise<Array<FitbitMonthlyCaloriesData>> =>
       await getMonthlyCalories(calories),

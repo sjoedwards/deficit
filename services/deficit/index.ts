@@ -4,6 +4,7 @@ import { NextApiResponse } from "next";
 import { cache } from "../../cache";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
 import { predictService } from "../predict";
+import { groupIntoQuarterlyCalories } from "../../tools/get-calories-current-quarter";
 const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) =>
   (
     calories.reduce(
@@ -31,6 +32,19 @@ const deficitService = async (
     calories = await getCalories(request);
     cache.set("calories", calories, request);
   }
+
+  const caloriesCurrentQuarter = groupIntoQuarterlyCalories(calories);
+  const deficitsCurrentQuarter = caloriesCurrentQuarter.map(
+    ({ dateTime, deficit }) => ({
+      dateTime,
+      deficit,
+    })
+  );
+
+  const averageDeficitCurrentQuarter = getAverageDeficit(
+    caloriesCurrentQuarter
+  );
+
   const monthlyCalories = groupIntoMonthlyCalories(calories);
 
   const caloriesCurrentMonth = monthlyCalories[monthlyCalories.length - 1];
@@ -79,10 +93,26 @@ const deficitService = async (
       weightDiffMovingAverage: 5,
     }
   )) || {};
+
+  const { weightDiff: weightDiffQuarter, deficitForRemainingDaysThisQuarter } =
+    (await predictService(
+      request,
+      response,
+      averageDeficitCurrentQuarter,
+      "quarterly",
+      goal,
+      {
+        weightDiffMovingAverage: 5,
+      }
+    )) || {};
+
   const weightDiffFixed = weightDiff && weightDiff.toFixed(3);
   const deficitForRemainingDaysThisMonthFixed =
     deficitForRemainingDaysThisMonth &&
     deficitForRemainingDaysThisMonth.toFixed(0);
+  const weightDiffQuarterFixed = weightDiffQuarter?.toFixed(3);
+  const deficitForRemainingDaysThisQuarterFixed =
+    deficitForRemainingDaysThisQuarter?.toFixed(0);
 
   return {
     averageDeficitCurrentMonth,
@@ -109,6 +139,17 @@ const deficitService = async (
       },
     },
     deficits: deficitsCurrentMonth,
+    currentQuarter: {
+      averageDeficitCurrentQuarter,
+      predictedWeeklyWeightDiff: {
+        noMovingAverage: {
+          weightDiffKilos: weightDiffQuarterFixed,
+          rSquaredValue: rSquaredValue && rSquaredValue.toFixed(3),
+          deficitForRemainingDaysThisQuarter:
+            deficitForRemainingDaysThisQuarterFixed,
+        },
+      },
+    },
   };
 };
 

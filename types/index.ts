@@ -74,7 +74,7 @@ export interface FitbitActivityData {
   activityName: string;
 }
 
-export type ResolutionNames = "daily" | "weekly" | "monthly";
+export type ResolutionNames = "daily" | "weekly" | "monthly" | "quarterly";
 
 export interface DeficitGoalData {
   weightDiff?: string;
@@ -93,6 +93,7 @@ export interface PredictionData {
   rSquaredValue: number;
   goal: number;
   deficitForRemainingDaysThisMonth?: number;
+  deficitForRemainingDaysThisQuarter?: number;
 }
 
 export type WeightResolutionType<T> = T extends "daily"
@@ -100,6 +101,8 @@ export type WeightResolutionType<T> = T extends "daily"
   : T extends "weekly"
   ? FitbitWeeklyWeightData[]
   : T extends "monthly"
+  ? FitbitMonthlyWeightData[]
+  : T extends "quarterly"
   ? FitbitMonthlyWeightData[]
   : never;
 

@@ -18,5 +18,15 @@ const deficitExpectedResponse = {
     },
   },
   deficits: [{ dateTime: "2021-06-01", deficit: "-1095" }],
+  currentQuarter: {
+    averageDeficitCurrentQuarter: "-710",
+    predictedWeeklyWeightDiff: {
+      noMovingAverage: {
+        deficitForRemainingDaysThisQuarter: "-169983",
+        rSquaredValue: "0.091",
+        weightDiffKilos: "0.048",
+      },
+    },
+  },
 };
 export { deficitExpectedResponse };
