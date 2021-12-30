@@ -176,6 +176,10 @@ export const weightService = async <T extends ResolutionNames>(
       weight: Array<FitbitDailyWeightData>
     ): Promise<Array<FitbitMonthlyWeightData>> =>
       await getMonthlyWeight(weight),
+    quarterly: async (
+      weight: Array<FitbitDailyWeightData>
+    ): Promise<Array<FitbitMonthlyWeightData>> =>
+      await getMonthlyWeight(weight),
   };
 
   const [, getWeightMethod] =

@@ -14,6 +14,15 @@ interface IDeficitResponse {
     };
   };
   deficits: IDeficitApiData[];
+  currentQuarter: {
+    averageDeficitCurrentQuarter: number;
+    predictedWeeklyWeightDiff: {
+      noMovingAverage: {
+        weightDiffKilos: string;
+        deficitForRemainingDaysThisQuarter: string;
+      };
+    };
+  };
 }
 
 interface IDeficitApiData {
@@ -33,6 +42,16 @@ const config = getConfig();
 
 export default function Home(): ReactElement {
   const [averageDeficit, setAverageDeficit] = useState("");
+  const [averageDeficitCurrentQuarter, setAverageDeficitCurrentQuarter] =
+    useState("");
+
+  const [
+    deficitRemainingCurrentQuarter,
+    setAverageDeficitRemainingCurrentQuarter,
+  ] = useState("");
+
+  const [weightDiffCurrentQuarter, setWeightDiffCurrentQuarter] = useState("");
+
   const [deficitRemaining, setAverageDeficitRemaining] = useState("");
   const [weightDiff, setWeightDiff] = useState("");
   const [error, setError] = useState(false);
@@ -50,6 +69,7 @@ export default function Home(): ReactElement {
           averageDeficitCurrentMonth,
           predictedWeeklyWeightDiff,
           deficits,
+          currentQuarter,
         } = response?.data || {};
         const { weightDiffKilos, deficitForRemainingDaysThisMonth } =
           predictedWeeklyWeightDiff?.noMovingAverage || {};
@@ -57,6 +77,17 @@ export default function Home(): ReactElement {
         setAverageDeficitRemaining(deficitForRemainingDaysThisMonth);
         setWeightDiff(weightDiffKilos);
         setDeficits(deficits);
+        setAverageDeficitCurrentQuarter(
+          `${currentQuarter.averageDeficitCurrentQuarter}`
+        );
+        setAverageDeficitRemainingCurrentQuarter(
+          currentQuarter.predictedWeeklyWeightDiff.noMovingAverage
+            .deficitForRemainingDaysThisQuarter
+        );
+        setWeightDiffCurrentQuarter(
+          currentQuarter.predictedWeeklyWeightDiff.noMovingAverage
+            .weightDiffKilos
+        );
       } catch (e) {
         if (e?.response?.status === 401) {
           Router.push(
@@ -88,6 +119,15 @@ export default function Home(): ReactElement {
           <>
             <div>
               <p>
+                Your deficit today is{" "}
+                {deficits?.[deficits?.length - 1]?.deficit}
+              </p>
+            </div>
+            <div>
+              <h2>Current Month</h2>
+            </div>
+            <div>
+              <p>
                 You have an average daily deficit of {averageDeficit} calories
                 (averaged over days this month)
               </p>
@@ -108,9 +148,28 @@ export default function Home(): ReactElement {
             </div>
 
             <div>
+              <h2>Current Quarter</h2>
+            </div>
+
+            <div>
               <p>
-                Your deficit today is{" "}
-                {deficits?.[deficits?.length - 1]?.deficit}
+                You have an average daily deficit of{" "}
+                {averageDeficitCurrentQuarter} calories (averaged over days this
+                quarter)
+              </p>
+            </div>
+            <div>
+              <p>
+                You are predicted to{" "}
+                {parseFloat(weightDiffCurrentQuarter) >= 0 ? "gain" : "lose"}{" "}
+                {Math.abs(parseFloat(weightDiffCurrentQuarter))} kilograms per
+                week, based off of your historic metabolic data.
+              </p>
+            </div>
+            <div>
+              <p>
+                You need a deficit of {deficitRemainingCurrentQuarter} for the
+                rest of the days this month to lose your goal of 0.25 kilos
               </p>
             </div>
           </>

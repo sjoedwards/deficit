@@ -17,7 +17,10 @@ import {
 import moment from "moment";
 import { logWarning } from "../../tools/log-warning";
 import { simpleMovingWeightAverage } from "../../tools/simple-moving-weight-average";
-import { predictDeficitForRemainderOfMonth } from "./predict-deficit-for-remainder";
+import {
+  predictDeficitForRemainderOfMonth,
+  predictDeficitForRemainderOfQuarter,
+} from "./predict-deficit-for-remainder";
 import { caloriesService } from "../calories";
 
 export const predictWeightDiffForDeficit = (
@@ -71,7 +74,11 @@ const predictService = async (
   goal: number,
   options?: IPredictServiceOptions
 ): Promise<PredictionData | undefined> => {
-  if (resolution !== "weekly" && resolution !== "monthly") {
+  if (
+    resolution !== "weekly" &&
+    resolution !== "monthly" &&
+    resolution !== "quarterly"
+  ) {
     throw new Error("Resolution not supported");
   }
 
@@ -81,6 +88,12 @@ const predictService = async (
 
   const isMonthly = (resolution: ResolutionNames): resolution is "monthly" => {
     return resolution === "monthly";
+  };
+
+  const isQuarterly = (
+    resolution: ResolutionNames
+  ): resolution is "quarterly" => {
+    return resolution === "quarterly";
   };
 
   if (isWeekly(resolution)) {
@@ -220,6 +233,93 @@ const predictService = async (
     );
 
     return { ...monthlyDiffForDeficit, goal };
+  }
+
+  if (isQuarterly(resolution)) {
+    const calories = await caloriesService("weekly", request, response);
+    const weight = await weightService("weekly", request);
+
+    request.state = {
+      ...request?.state,
+      data: { ...request?.state?.data, calories, weight },
+    };
+
+    const weightWithDiff: FitbitWeeklyWeightData[] = weight
+      .map((value, index) => {
+        const previousValueWeight = parseFloat(weight[index - 1]?.weight);
+        return {
+          ...value,
+          weightDiff:
+            typeof previousValueWeight !== "undefined"
+              ? (parseFloat(value.weight) - previousValueWeight)?.toString()
+              : undefined,
+        };
+      })
+      .filter(({ weightDiff }) => weightDiff);
+
+    const simpleWeightMovingAverage = options?.weightDiffMovingAverage
+      ? simpleMovingWeightAverage(
+          weightWithDiff,
+          options?.weightDiffMovingAverage
+        )
+      : undefined;
+
+    const getCombinedWeeklyValues = (deficitWeeksAgo: number) => {
+      const weightValues = simpleWeightMovingAverage
+        ? simpleWeightMovingAverage
+        : weightWithDiff;
+
+      return weightValues
+        .map(({ weekEnd, weightDiff }) => {
+          // Find the caloriesResponse entry for the dateTime
+          const deficit = calories.find(
+            (entry) =>
+              entry.weekEnd ===
+              moment(weekEnd)
+                .subtract(deficitWeeksAgo, "week")
+                .format("YYYY-MM-DD")
+          )?.deficit;
+
+          return {
+            weightDiff,
+            deficit,
+          };
+        })
+        .filter(
+          ({ deficit, weightDiff }) =>
+            typeof deficit !== "undefined" &&
+            deficit !== "NaN" &&
+            typeof weightDiff !== "undefined" &&
+            weightDiff !== "NaN"
+        );
+    };
+
+    const combinedValues = getCombinedWeeklyValues(1);
+
+    const linearRegressionInformation =
+      getLinearRegressionInformation(combinedValues);
+
+    const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
+      combinedValues,
+      parseInt(deficit),
+      request,
+      linearRegressionInformation
+    );
+
+    const deficitForRemainingDaysThisQuarter =
+      await predictDeficitForRemainderOfQuarter(
+        request,
+        response,
+        linearRegressionInformation.gradient,
+        linearRegressionInformation.intercept,
+        goal
+      );
+
+    return {
+      ...weeklyWeightDiffForDeficit,
+      deficitForRemainingDaysThisQuarter,
+      goal,
+    };
   }
 };
 
