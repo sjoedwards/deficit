@@ -143,7 +143,7 @@ export default function Home(): ReactElement {
             <div>
               <p>
                 You need a deficit of {deficitRemaining} for the rest of the
-                days this month to lose your goal of 0.25 kilos
+                days this month to lose your weekly goal of 0.25 kilos
               </p>
             </div>
 
@@ -169,7 +169,8 @@ export default function Home(): ReactElement {
             <div>
               <p>
                 You need a deficit of {deficitRemainingCurrentQuarter} for the
-                rest of the days this month to lose your goal of 0.25 kilos
+                rest of the days this quarter to lose your weekly goal of 0.25
+                kilos
               </p>
             </div>
           </>
