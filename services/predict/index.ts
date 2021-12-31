@@ -100,11 +100,14 @@ const predictService = async (
     const calories = await caloriesService(resolution, request, response);
     const weight = await weightService(resolution, request);
 
+    // New function that adds to request state
+    addDataToState(request);
     request.state = {
       ...request?.state,
       data: { ...request?.state?.data, calories, weight },
     };
 
+    // Reusable function which takes a variable type
     const weightWithDiff: FitbitWeeklyWeightData[] = weight
       .map((value, index) => {
         const previousValueWeight = parseFloat(weight[index - 1]?.weight);
@@ -118,6 +121,7 @@ const predictService = async (
       })
       .filter(({ weightDiff }) => weightDiff);
 
+    // Reusable function which takes a variable type
     const simpleWeightMovingAverage = options?.weightDiffMovingAverage
       ? simpleMovingWeightAverage(
           weightWithDiff,
@@ -125,6 +129,7 @@ const predictService = async (
         )
       : undefined;
 
+    // Reusable function which takes a variable type - getCombinedValue?
     const getCombinedWeeklyValues = (deficitWeeksAgo: number) => {
       const weightValues = simpleWeightMovingAverage
         ? simpleWeightMovingAverage
@@ -167,6 +172,7 @@ const predictService = async (
       linearRegressionInformation
     );
 
+    // Can move to single function with variable parameter for resolution
     const deficitForRemainingDaysThisMonth =
       await predictDeficitForRemainderOfMonth(
         request,

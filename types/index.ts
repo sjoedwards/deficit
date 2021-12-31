@@ -114,3 +114,13 @@ export enum EMethod {
 export interface IFitbitOptions {
   headers: {};
 }
+
+export type CalorieResolutionType<T> = T extends "daily"
+  ? FitbitDailyCaloriesData[]
+  : T extends "weekly"
+  ? FitbitWeeklyCaloriesData[]
+  : T extends "monthly"
+  ? FitbitMonthlyCaloriesData[]
+  : T extends "quarterly"
+  ? FitbitMonthlyCaloriesData[]
+  : never;
