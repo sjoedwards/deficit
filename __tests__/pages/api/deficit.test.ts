@@ -20,14 +20,13 @@ beforeEach(() => {
   calMockservice.mockDefault();
   weightMockService.mockDefault();
   authMockService.mockDefault();
-  realDateNow = Date.now.bind(global.Date);
   // stub date to 1 June 2021 22:57:05
-  global.Date.now = jest.fn().mockReturnValue(1622588225000);
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(1622588225000));
 });
-
 afterEach(() => {
   calMockservice.get().resetHistory();
-  global.Date.now = realDateNow;
+  jest.useRealTimers();
 });
 
 describe("Deficit handler", () => {
