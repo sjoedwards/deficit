@@ -22,9 +22,9 @@ const deficitExpectedResponse = {
     averageDeficitCurrentQuarter: "-710",
     predictedWeeklyWeightDiff: {
       noMovingAverage: {
-        deficitForRemainingDaysThisQuarter: "-5780",
+        deficitForRemainingDaysThisQuarter: "-3773",
         rSquaredValue: "0.091",
-        weightDiffKilos: "0.048",
+        weightDiffKilos: "0.086",
       },
     },
   },
