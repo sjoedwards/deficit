@@ -176,6 +176,10 @@ const predictService = async (
         goal
       );
 
+    console.log(
+      "🚀 ~ file: index.ts ~ line 184 ~ weeklyWeightDiffForDeficit",
+      weeklyWeightDiffForDeficit
+    );
     return {
       ...weeklyWeightDiffForDeficit,
       deficitForRemainingDaysThisMonth,
@@ -314,6 +318,10 @@ const predictService = async (
         linearRegressionInformation.intercept,
         goal
       );
+    console.log(
+      "🚀 ~ file: index.ts ~ line 327 ~ weeklyWeightDiffForDeficit",
+      weeklyWeightDiffForDeficit
+    );
 
     return {
       ...weeklyWeightDiffForDeficit,
