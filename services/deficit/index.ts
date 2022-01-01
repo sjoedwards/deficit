@@ -100,10 +100,7 @@ const deficitService = async (
       response,
       averageDeficitCurrentQuarter,
       "quarterly",
-      goal,
-      {
-        weightDiffMovingAverage: 5,
-      }
+      goal
     )) || {};
 
   const weightDiffFixed = weightDiff && weightDiff.toFixed(3);
