@@ -190,5 +190,10 @@ export const weightService = async <T extends ResolutionNames>(
 
   const weightData = (await getWeightMethod(weight)) as WeightResolutionType<T>;
 
+  console.log(
+    `Last five weight values`,
+    JSON.stringify(weightData.slice(Math.max(weightData.length - 5, 0)))
+  );
+
   return weightData;
 };
