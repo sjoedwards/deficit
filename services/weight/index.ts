@@ -109,16 +109,24 @@ const getWeeklyWeight = async (
     })
     //TODO remove
     .map((element, index, self) => {
-      if (index === self.length - 1) {
-        console.log(`1`, element);
+      if (
+        index === self.length - 1 ||
+        index === self.length - 2 ||
+        index === self.length - 3
+      ) {
+        console.log(`1`, index, element);
       }
       return element;
     })
     .filter((value, index, self) => self.indexOf(value) === index)
     // TODO remove
     .map((element, index, self) => {
-      if (index === self.length - 1) {
-        console.log(`2`, element);
+      if (
+        index === self.length - 1 ||
+        index === self.length - 2 ||
+        index === self.length - 3
+      ) {
+        console.log(`2`, index, element);
       }
       return element;
     })
@@ -130,8 +138,12 @@ const getWeeklyWeight = async (
     )
     // TODO remove
     .map((element, index, self) => {
-      if (index === self.length - 1) {
-        console.log(`3`, element);
+      if (
+        index === self.length - 1 ||
+        index === self.length - 2 ||
+        index === self.length - 3
+      ) {
+        console.log(`3`, index, element);
       }
       return element;
     })
@@ -158,8 +170,12 @@ const getWeeklyWeight = async (
     })
     // TODO remove
     .map((element, index, self) => {
-      if (index === self.length - 1) {
-        console.log(`4`, element);
+      if (
+        index === self.length - 1 ||
+        index === self.length - 2 ||
+        index === self.length - 3
+      ) {
+        console.log(`4`, index, element);
       }
       return element;
     })
@@ -169,8 +185,12 @@ const getWeeklyWeight = async (
         moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
     ) // TODO remove
     .map((element, index, self) => {
-      if (index === self.length - 1) {
-        console.log(`5a`, element);
+      if (
+        index === self.length - 1 ||
+        index === self.length - 2 ||
+        index === self.length - 3
+      ) {
+        console.log(`5a`, index, element);
       }
       return element;
     });
