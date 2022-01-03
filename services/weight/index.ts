@@ -170,7 +170,7 @@ const getWeeklyWeight = async (
     ) // TODO remove
     .map((element, index, self) => {
       if (index === self.length - 1) {
-        console.log(`5`, element);
+        console.log(`5a`, element);
       }
       return element;
     });
