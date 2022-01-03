@@ -107,13 +107,34 @@ const getWeeklyWeight = async (
     .map((entry) => {
       return moment(entry.dateTime).locale("en-gb").week();
     })
+    //TODO remove
+    .map((element, index, self) => {
+      if (index === self.length - 1) {
+        console.log(`1`, element);
+      }
+      return element;
+    })
     .filter((value, index, self) => self.indexOf(value) === index)
+    // TODO remove
+    .map((element, index, self) => {
+      if (index === self.length - 1) {
+        console.log(`2`, element);
+      }
+      return element;
+    })
     // Nested array of entries for each week
     .map((week) =>
       apiWeight.filter(
         (entry) => moment(entry.dateTime).locale("en-gb").week() === week
       )
     )
+    // TODO remove
+    .map((element, index, self) => {
+      if (index === self.length - 1) {
+        console.log(`3`, element);
+      }
+      return element;
+    })
     .map((weeklyWeight) => {
       return {
         // Reduce each week to a single value
@@ -135,11 +156,24 @@ const getWeeklyWeight = async (
         })(),
       };
     })
+    // TODO remove
+    .map((element, index, self) => {
+      if (index === self.length - 1) {
+        console.log(`4`, element);
+      }
+      return element;
+    })
     .filter(
       (week) =>
         week.weekEnd !==
         moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
-    );
+    ) // TODO remove
+    .map((element, index, self) => {
+      if (index === self.length - 1) {
+        console.log(`5`, element);
+      }
+      return element;
+    });
 
   return weeklyWeight;
 };
@@ -165,10 +199,6 @@ export const weightService = async <T extends ResolutionNames>(
     cache.set("weight", weight, request);
   }
 
-  console.log(
-    `Last five raw weight values`,
-    JSON.stringify(weight.slice(Math.max(weight.length - 5, 0)))
-  );
   const resolutionsMap = {
     daily: (
       weight: Array<FitbitDailyWeightData>
@@ -194,11 +224,6 @@ export const weightService = async <T extends ResolutionNames>(
   }
 
   const weightData = (await getWeightMethod(weight)) as WeightResolutionType<T>;
-
-  console.log(
-    `Last five weight values`,
-    JSON.stringify(weightData.slice(Math.max(weightData.length - 5, 0)))
-  );
 
   return weightData;
 };
