@@ -193,7 +193,7 @@ export const caloriesService = async <T extends ResolutionNames>(
   }
 
   console.log(
-    `Last five calories values`,
+    `Last five raw calories values`,
     JSON.stringify(calories.slice(Math.max(calories.length - 5, 0)))
   );
 
