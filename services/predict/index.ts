@@ -4,7 +4,6 @@ import {
   ResolutionNames,
   DeficitGoalData,
   LinearRegressionInformation,
-  FitbitWeeklyWeightData,
   PredictionData,
 } from "../../types";
 
@@ -22,6 +21,8 @@ import {
   predictDeficitForRemainderOfQuarter,
 } from "./predict-deficit-for-remainder";
 import { caloriesService } from "../calories";
+import { addDataToState } from "./add-data-to-state";
+import { getWeightWithDiff } from "./get-weight-with-diff";
 
 export const predictWeightDiffForDeficit = (
   combinedValues: Array<DeficitGoalData>,
@@ -99,27 +100,8 @@ const predictService = async (
   if (isWeekly(resolution)) {
     const calories = await caloriesService(resolution, request, response);
     const weight = await weightService(resolution, request);
-
-    // New function that adds to request state
-    addDataToState(request);
-    request.state = {
-      ...request?.state,
-      data: { ...request?.state?.data, calories, weight },
-    };
-
-    // Reusable function which takes a variable type
-    const weightWithDiff: FitbitWeeklyWeightData[] = weight
-      .map((value, index) => {
-        const previousValueWeight = parseFloat(weight[index - 1]?.weight);
-        return {
-          ...value,
-          weightDiff:
-            typeof previousValueWeight !== "undefined"
-              ? (parseFloat(value.weight) - previousValueWeight)?.toString()
-              : undefined,
-        };
-      })
-      .filter(({ weightDiff }) => weightDiff);
+    addDataToState(request, calories, weight);
+    const weightWithDiff = getWeightWithDiff(weight);
 
     // Reusable function which takes a variable type
     const simpleWeightMovingAverage = options?.weightDiffMovingAverage
@@ -192,23 +174,9 @@ const predictService = async (
   if (isMonthly(resolution)) {
     const calories = await caloriesService(resolution, request, response);
     const weight = await weightService(resolution, request);
-    request.state = {
-      ...request?.state,
-      data: { ...request?.state?.data, calories, weight },
-    };
+    addDataToState(request, calories, weight);
 
-    const weightWithDiff = weight
-      .map((value, index) => {
-        const previousValueWeight = parseFloat(weight[index - 1]?.weight);
-        return {
-          ...value,
-          weightDiff:
-            typeof previousValueWeight !== "undefined"
-              ? (parseFloat(value.weight) - previousValueWeight)?.toString()
-              : undefined,
-        };
-      })
-      .filter(({ weightDiff }) => weightDiff);
+    const weightWithDiff = getWeightWithDiff(weight);
 
     const getCombinedMonthlyValues = (deficitWeeksAgo: number) =>
       weightWithDiff
@@ -245,23 +213,9 @@ const predictService = async (
     const calories = await caloriesService("weekly", request, response);
     const weight = await weightService("weekly", request);
 
-    request.state = {
-      ...request?.state,
-      data: { ...request?.state?.data, calories, weight },
-    };
+    addDataToState(request, calories, weight);
 
-    const weightWithDiff: FitbitWeeklyWeightData[] = weight
-      .map((value, index) => {
-        const previousValueWeight = parseFloat(weight[index - 1]?.weight);
-        return {
-          ...value,
-          weightDiff:
-            typeof previousValueWeight !== "undefined"
-              ? (parseFloat(value.weight) - previousValueWeight)?.toString()
-              : undefined,
-        };
-      })
-      .filter(({ weightDiff }) => weightDiff);
+    const weightWithDiff = getWeightWithDiff(weight);
 
     const simpleWeightMovingAverage = options?.weightDiffMovingAverage
       ? simpleMovingWeightAverage(

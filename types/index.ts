@@ -38,18 +38,20 @@ export interface APIFitbitWeightData {
   weight: number;
   source: string;
 }
-export interface FitbitDailyWeightData {
-  dateTime: string;
+
+export interface FitbitWeightData {
   weight: string;
 }
+export interface FitbitDailyWeightData extends FitbitWeightData {
+  dateTime: string;
+}
 
-export interface FitbitWeeklyWeightData {
+export interface FitbitWeeklyWeightData extends FitbitWeightData {
   weekEnd: string;
-  weight: string;
   weightDiff?: string;
 }
 
-export interface FitbitMonthlyWeightData {
+export interface FitbitMonthlyWeightData extends FitbitWeightData {
   monthEnd: string;
   weight: string;
 }
