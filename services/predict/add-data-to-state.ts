@@ -1,12 +1,17 @@
-import { IExtendedRequest, ResolutionNames } from "../../types";
+import {
+  FitbitMonthlyCaloriesData,
+  FitbitWeeklyCaloriesData,
+  FitbitWeeklyWeightData,
+  FitbitMonthlyWeightData,
+  IExtendedRequest,
+} from "../../types";
 
 // Start here
 const addDataToState = (
-  resolution: T,
   request: IExtendedRequest,
-  calories,
-  weight
-): Promise<CalorieResolutionType<T>> => {
+  calories: FitbitWeeklyCaloriesData[] | FitbitMonthlyCaloriesData[],
+  weight: FitbitWeeklyWeightData[] | FitbitMonthlyWeightData[]
+): void => {
   request.state = {
     ...request?.state,
     data: { ...request?.state?.data, calories, weight },

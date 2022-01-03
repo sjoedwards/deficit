@@ -11,7 +11,6 @@ import {
 import moment from "moment";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { logDebug } from "../../tools/log-debug";
 
 const getMonthlyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
