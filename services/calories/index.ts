@@ -220,5 +220,10 @@ export const caloriesService = async <T extends ResolutionNames>(
 
   const caloriesData = (await getCaloriesMethod(calories)) as ResolutionType<T>;
 
+  console.log(
+    `Last five calories values`,
+    JSON.stringify(caloriesData.slice(Math.max(caloriesData.length - 5, 0)))
+  );
+
   return caloriesData;
 };
