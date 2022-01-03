@@ -192,11 +192,6 @@ export const caloriesService = async <T extends ResolutionNames>(
     cache.set("calories", calories, request);
   }
 
-  console.log(
-    `Last five raw calories values`,
-    JSON.stringify(calories.slice(Math.max(calories.length - 5, 0)))
-  );
-
   const resolutionsMap = {
     daily: (
       calories: Array<FitbitDailyCaloriesData>
@@ -224,11 +219,6 @@ export const caloriesService = async <T extends ResolutionNames>(
   }
 
   const caloriesData = (await getCaloriesMethod(calories)) as ResolutionType<T>;
-
-  console.log(
-    `Last five calories values`,
-    JSON.stringify(caloriesData.slice(Math.max(caloriesData.length - 5, 0)))
-  );
 
   return caloriesData;
 };
