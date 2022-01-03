@@ -164,6 +164,11 @@ export const weightService = async <T extends ResolutionNames>(
     weight = await getWeight(request);
     cache.set("weight", weight, request);
   }
+
+  console.log(
+    `Last five raw weight values`,
+    JSON.stringify(weight.slice(Math.max(weight.length - 5, 0)))
+  );
   const resolutionsMap = {
     daily: (
       weight: Array<FitbitDailyWeightData>
