@@ -162,7 +162,9 @@ const getWeeklyWeight = async (
         })(),
         // Find the week end date from the first value
         weekEnd: (() => {
-          return moment(Object.values(weeklyWeight)[0].dateTime)
+          return moment(
+            Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
+          )
             .endOf("isoWeek")
             .format("YYYY-MM-DD");
         })(),
