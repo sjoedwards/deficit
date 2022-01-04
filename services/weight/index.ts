@@ -11,6 +11,7 @@ import {
 } from "./../../types/index";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
+import { endOfISOWeek, endOfWeek, format, parseISO } from "date-fns";
 
 const getWeight = async (
   request: IExtendedRequest
@@ -102,52 +103,25 @@ const getWeeklyWeight = async (
   apiWeight: Array<FitbitDailyWeightData>,
   decimalPlaces?: number
 ): Promise<Array<FitbitWeeklyWeightData>> => {
-  const weeklyWeight = apiWeight
-    // Get unique weeks
-    .map((entry) => {
-      return moment(entry.dateTime).locale("en-gb").week();
-    })
-    //TODO remove
-    .map((element, index, self) => {
-      if (
-        index === self.length - 1 ||
-        index === self.length - 2 ||
-        index === self.length - 3
-      ) {
-        console.log(`1`, index, element);
-      }
-      return element;
-    })
-    .filter((value, index, self) => self.indexOf(value) === index)
-    // TODO remove
-    .map((element, index, self) => {
-      if (
-        index === self.length - 1 ||
-        index === self.length - 2 ||
-        index === self.length - 3
-      ) {
-        console.log(`2`, index, element);
-      }
-      return element;
-    })
-    // Nested array of entries for each week
-    .map((week) =>
-      apiWeight.filter(
-        (entry) => moment(entry.dateTime).locale("en-gb").week() === week
-      )
-    )
-    // TODO remove
-    .map((element, index, self) => {
-      if (
-        index === self.length - 1 ||
-        index === self.length - 2 ||
-        index === self.length - 3
-      ) {
-        console.log(`3`, index, element);
-      }
-      return element;
-    })
+  const weeklyWeights = apiWeight.reduce<{
+    [key: string]: FitbitDailyWeightData[];
+  }>((acc, entry) => {
+    const endOfWeek = format(
+      endOfISOWeek(new Date(entry.dateTime)),
+      "yyyy-MM-dd"
+    );
+    const existingWeekInAcc = acc[endOfWeek] || [];
+    return {
+      ...acc,
+      [endOfWeek]: [...existingWeekInAcc, { ...entry, endOfWeek }],
+    };
+  }, {});
+  const reducedWeeklyWeights = Object.values(weeklyWeights)
     .map((weeklyWeight) => {
+      console.log(
+        "🚀 ~ file: index.ts ~ line 121 ~ .map ~ weeklyWeight",
+        weeklyWeight
+      );
       return {
         // Reduce each week to a single value
         weight: (() => {
@@ -198,7 +172,7 @@ const getWeeklyWeight = async (
       return element;
     });
 
-  return weeklyWeight;
+  return reducedWeeklyWeights;
 };
 
 export const weightService = async <T extends ResolutionNames>(
