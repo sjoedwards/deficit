@@ -118,10 +118,6 @@ const getWeeklyWeight = async (
   }, {});
   const reducedWeeklyWeights = Object.values(weeklyWeights)
     .map((weeklyWeight) => {
-      console.log(
-        "🚀 ~ file: index.ts ~ line 121 ~ .map ~ weeklyWeight",
-        weeklyWeight
-      );
       return {
         // Reduce each week to a single value
         weight: (() => {
@@ -140,7 +136,7 @@ const getWeeklyWeight = async (
             Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
           )
             .locale("en-gb")
-            .endOf("week")
+            .endOf("isoWeek")
             .format("YYYY-MM-DD");
         })(),
       };
@@ -159,7 +155,7 @@ const getWeeklyWeight = async (
     .filter(
       (week) =>
         week.weekEnd !==
-        moment().locale("en-gb").endOf("week").format("YYYY-MM-DD")
+        moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
     ) // TODO remove
     .map((element, index, self) => {
       if (
