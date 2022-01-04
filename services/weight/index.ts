@@ -11,7 +11,7 @@ import {
 } from "./../../types/index";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { endOfISOWeek, endOfWeek, format, parseISO } from "date-fns";
+import { endOfISOWeek, format } from "date-fns";
 
 const getWeight = async (
   request: IExtendedRequest
@@ -110,6 +110,7 @@ const getWeeklyWeight = async (
       endOfISOWeek(new Date(entry.dateTime)),
       "yyyy-MM-dd"
     );
+    console.log("🚀 ~ file: index.ts ~ line 113 ~ endOfWeek", endOfWeek);
     const existingWeekInAcc = acc[endOfWeek] || [];
     return {
       ...acc,
@@ -132,12 +133,14 @@ const getWeeklyWeight = async (
         })(),
         // Find the week end date from the last value
         weekEnd: (() => {
-          return moment(
-            Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
-          )
-            .locale("en-gb")
-            .endOf("isoWeek")
-            .format("YYYY-MM-DD");
+          return format(
+            endOfISOWeek(
+              new Date(
+                Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
+              )
+            ),
+            "yyyy-MM-dd"
+          );
         })(),
       };
     })
@@ -153,10 +156,8 @@ const getWeeklyWeight = async (
       return element;
     })
     .filter(
-      (week) =>
-        week.weekEnd !==
-        moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
-    ) // TODO remove
+      (week) => week.weekEnd !== format(endOfISOWeek(new Date()), "yyyy-MM-dd")
+    )
     .map((element, index, self) => {
       if (
         index === self.length - 1 ||
