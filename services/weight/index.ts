@@ -134,7 +134,7 @@ const getWeeklyWeight = async (
             ? weight.toFixed(decimalPlaces)
             : weight.toString();
         })(),
-        // Find the week end date from the first value
+        // Find the week end date from the last value
         weekEnd: (() => {
           return moment(
             Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
@@ -205,10 +205,6 @@ export const weightService = async <T extends ResolutionNames>(
     ): Promise<Array<FitbitWeeklyWeightData>> =>
       await getWeeklyWeight(weight, decimalPlaces),
     monthly: async (
-      weight: Array<FitbitDailyWeightData>
-    ): Promise<Array<FitbitMonthlyWeightData>> =>
-      await getMonthlyWeight(weight),
-    quarterly: async (
       weight: Array<FitbitDailyWeightData>
     ): Promise<Array<FitbitMonthlyWeightData>> =>
       await getMonthlyWeight(weight),
