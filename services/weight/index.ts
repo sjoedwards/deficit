@@ -1,4 +1,3 @@
-import axios from "axios";
 import moment from "moment";
 import {
   ResolutionNames,
@@ -143,30 +142,9 @@ const getWeeklyWeight = async (
         })(),
       };
     })
-    // TODO remove
-    .map((element, index, self) => {
-      if (
-        index === self.length - 1 ||
-        index === self.length - 2 ||
-        index === self.length - 3
-      ) {
-        console.log(`4`, index, element);
-      }
-      return element;
-    })
     .filter(
       (week) => week.weekEnd !== format(endOfISOWeek(new Date()), "yyyy-MM-dd")
-    )
-    .map((element, index, self) => {
-      if (
-        index === self.length - 1 ||
-        index === self.length - 2 ||
-        index === self.length - 3
-      ) {
-        console.log(`5a`, index, element);
-      }
-      return element;
-    });
+    );
 
   return reducedWeeklyWeights;
 };

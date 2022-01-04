@@ -1,5 +1,4 @@
 import { updateWeekStartDay } from "./../../../tools/update-week-start-day";
-import moment from "moment";
 import { isResolution } from "./../../../tools/is-resolution";
 import createHTTPError from "http-errors";
 import { caloriesService } from "../../../services/calories";

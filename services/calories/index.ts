@@ -1,5 +1,5 @@
 import { NextApiResponse } from "next";
-import { IExtendedRequest } from "./../../types/index";
+import { CalorieResolutionType, IExtendedRequest } from "./../../types/index";
 import {
   ResolutionNames,
   FitbitData,
@@ -11,7 +11,6 @@ import {
 import moment from "moment";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { logDebug } from "../../tools/log-debug";
 
 const getMonthlyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
@@ -161,21 +160,11 @@ const getWeeklyCalories = async (
   return weeklyCalories;
 };
 
-type ResolutionType<T> = T extends "daily"
-  ? FitbitDailyCaloriesData[]
-  : T extends "weekly"
-  ? FitbitWeeklyCaloriesData[]
-  : T extends "monthly"
-  ? FitbitMonthlyCaloriesData[]
-  : T extends "quarterly"
-  ? FitbitMonthlyCaloriesData[]
-  : never;
-
 export const caloriesService = async <T extends ResolutionNames>(
   resolution: T,
   request: IExtendedRequest,
   response: NextApiResponse
-): Promise<ResolutionType<T>> => {
+): Promise<CalorieResolutionType<T>> => {
   let calories: Array<FitbitDailyCaloriesData>;
   const cachedCalories: Array<FitbitDailyCaloriesData> | undefined = cache.get(
     "calories",
@@ -218,7 +207,9 @@ export const caloriesService = async <T extends ResolutionNames>(
     throw new Error("Resolution not supported");
   }
 
-  const caloriesData = (await getCaloriesMethod(calories)) as ResolutionType<T>;
+  const caloriesData = (await getCaloriesMethod(
+    calories
+  )) as CalorieResolutionType<T>;
 
   return caloriesData;
 };
