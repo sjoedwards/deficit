@@ -110,7 +110,6 @@ const getWeeklyWeight = async (
       endOfISOWeek(new Date(entry.dateTime)),
       "yyyy-MM-dd"
     );
-    console.log("🚀 ~ file: index.ts ~ line 113 ~ endOfWeek", endOfWeek);
     const existingWeekInAcc = acc[endOfWeek] || [];
     return {
       ...acc,
