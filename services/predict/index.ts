@@ -76,7 +76,7 @@ const predictService = async (
     resolution !== "monthly" &&
     resolution !== "quarterly"
   ) {
-    throw new Error("Resolution not supported");
+    throw new Error("Resolution not supported.");
   }
 
   const isWeekly = (resolution: ResolutionNames): resolution is "weekly" => {
