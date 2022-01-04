@@ -166,7 +166,7 @@ const getWeeklyWeight = async (
             Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
           )
             .locale("en-gb")
-            .endOf("isoWeek")
+            .endOf("week")
             .format("YYYY-MM-DD");
         })(),
       };
@@ -185,7 +185,7 @@ const getWeeklyWeight = async (
     .filter(
       (week) =>
         week.weekEnd !==
-        moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
+        moment().locale("en-gb").endOf("week").format("YYYY-MM-DD")
     ) // TODO remove
     .map((element, index, self) => {
       if (
