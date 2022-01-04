@@ -165,6 +165,7 @@ const getWeeklyWeight = async (
           return moment(
             Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
           )
+            .locale("en-gb")
             .endOf("isoWeek")
             .format("YYYY-MM-DD");
         })(),
