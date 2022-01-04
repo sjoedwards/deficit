@@ -126,3 +126,7 @@ export type CalorieResolutionType<T> = T extends "daily"
   : T extends "quarterly"
   ? FitbitMonthlyCaloriesData[]
   : never;
+
+export interface IPredictServiceOptions {
+  weightDiffMovingAverage: number;
+}

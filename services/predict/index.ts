@@ -1,5 +1,9 @@
 import { NextApiResponse } from "next";
-import { IExtendedRequest } from "./../../types/index";
+import {
+  FitbitWeeklyWeightData,
+  IExtendedRequest,
+  IPredictServiceOptions,
+} from "./../../types/index";
 import {
   ResolutionNames,
   DeficitGoalData,
@@ -15,7 +19,6 @@ import {
 } from "simple-statistics";
 import moment from "moment";
 import { logWarning } from "../../tools/log-warning";
-import { simpleMovingWeightAverage } from "../../tools/simple-moving-weight-average";
 import {
   predictDeficitForRemainderOfMonth,
   predictDeficitForRemainderOfQuarter,
@@ -23,6 +26,7 @@ import {
 import { caloriesService } from "../calories";
 import { addDataToState } from "./add-data-to-state";
 import { getWeightWithDiff } from "./get-weight-with-diff";
+import { getCombinedWeeklyValues } from "./get-combined-weekly-value";
 
 export const predictWeightDiffForDeficit = (
   combinedValues: Array<DeficitGoalData>,
@@ -63,10 +67,6 @@ export const getLinearRegressionInformation = (
   return { intercept, gradient, rSquaredValue, regressionLine };
 };
 
-interface IPredictServiceOptions {
-  weightDiffMovingAverage: number;
-}
-
 const predictService = async (
   request: IExtendedRequest,
   response: NextApiResponse,
@@ -98,51 +98,12 @@ const predictService = async (
   };
 
   if (isWeekly(resolution)) {
-    const calories = await caloriesService(resolution, request, response);
-    const weight = await weightService(resolution, request);
-    addDataToState(request, calories, weight);
-    const weightWithDiff = getWeightWithDiff(weight);
-
-    // Reusable function which takes a variable type
-    const simpleWeightMovingAverage = options?.weightDiffMovingAverage
-      ? simpleMovingWeightAverage(
-          weightWithDiff,
-          options?.weightDiffMovingAverage
-        )
-      : undefined;
-
-    // Reusable function which takes a variable type - getCombinedValue?
-    const getCombinedWeeklyValues = (deficitWeeksAgo: number) => {
-      const weightValues = simpleWeightMovingAverage
-        ? simpleWeightMovingAverage
-        : weightWithDiff;
-
-      return weightValues
-        .map(({ weekEnd, weightDiff }) => {
-          // Find the caloriesResponse entry for the dateTime
-          const deficit = calories.find(
-            (entry) =>
-              entry.weekEnd ===
-              moment(weekEnd)
-                .subtract(deficitWeeksAgo, "week")
-                .format("YYYY-MM-DD")
-          )?.deficit;
-
-          return {
-            weightDiff,
-            deficit,
-          };
-        })
-        .filter(
-          ({ deficit, weightDiff }) =>
-            typeof deficit !== "undefined" &&
-            deficit !== "NaN" &&
-            typeof weightDiff !== "undefined" &&
-            weightDiff !== "NaN"
-        );
-    };
-
-    const combinedValues = getCombinedWeeklyValues(1);
+    const combinedValues = await getCombinedWeeklyValues(
+      1,
+      request,
+      response,
+      options
+    );
 
     const linearRegressionInformation =
       getLinearRegressionInformation(combinedValues);
@@ -154,7 +115,6 @@ const predictService = async (
       linearRegressionInformation
     );
 
-    // Can move to single function with variable parameter for resolution
     const deficitForRemainingDaysThisMonth =
       await predictDeficitForRemainderOfMonth(
         request,
@@ -167,6 +127,40 @@ const predictService = async (
     return {
       ...weeklyWeightDiffForDeficit,
       deficitForRemainingDaysThisMonth,
+      goal,
+    };
+  }
+
+  if (isQuarterly(resolution)) {
+    const combinedValues = await getCombinedWeeklyValues(
+      1,
+      request,
+      response,
+      options
+    );
+
+    const linearRegressionInformation =
+      getLinearRegressionInformation(combinedValues);
+
+    const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
+      combinedValues,
+      parseInt(deficit),
+      request,
+      linearRegressionInformation
+    );
+
+    const deficitForRemainingDaysThisQuarter =
+      await predictDeficitForRemainderOfQuarter(
+        request,
+        response,
+        linearRegressionInformation.gradient,
+        linearRegressionInformation.intercept,
+        goal
+      );
+
+    return {
+      ...weeklyWeightDiffForDeficit,
+      deficitForRemainingDaysThisQuarter,
       goal,
     };
   }
@@ -207,79 +201,6 @@ const predictService = async (
     );
 
     return { ...monthlyDiffForDeficit, goal };
-  }
-
-  if (isQuarterly(resolution)) {
-    const calories = await caloriesService("weekly", request, response);
-    const weight = await weightService("weekly", request);
-
-    addDataToState(request, calories, weight);
-
-    const weightWithDiff = getWeightWithDiff(weight);
-
-    const simpleWeightMovingAverage = options?.weightDiffMovingAverage
-      ? simpleMovingWeightAverage(
-          weightWithDiff,
-          options?.weightDiffMovingAverage
-        )
-      : undefined;
-
-    const getCombinedWeeklyValues = (deficitWeeksAgo: number) => {
-      const weightValues = simpleWeightMovingAverage
-        ? simpleWeightMovingAverage
-        : weightWithDiff;
-
-      return weightValues
-        .map(({ weekEnd, weightDiff }) => {
-          // Find the caloriesResponse entry for the dateTime
-          const deficit = calories.find(
-            (entry) =>
-              entry.weekEnd ===
-              moment(weekEnd)
-                .subtract(deficitWeeksAgo, "week")
-                .format("YYYY-MM-DD")
-          )?.deficit;
-
-          return {
-            weightDiff,
-            deficit,
-          };
-        })
-        .filter(
-          ({ deficit, weightDiff }) =>
-            typeof deficit !== "undefined" &&
-            deficit !== "NaN" &&
-            typeof weightDiff !== "undefined" &&
-            weightDiff !== "NaN"
-        );
-    };
-
-    const combinedValues = getCombinedWeeklyValues(1);
-
-    const linearRegressionInformation =
-      getLinearRegressionInformation(combinedValues);
-
-    const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
-      combinedValues,
-      parseInt(deficit),
-      request,
-      linearRegressionInformation
-    );
-
-    const deficitForRemainingDaysThisQuarter =
-      await predictDeficitForRemainderOfQuarter(
-        request,
-        response,
-        linearRegressionInformation.gradient,
-        linearRegressionInformation.intercept,
-        goal
-      );
-
-    return {
-      ...weeklyWeightDiffForDeficit,
-      deficitForRemainingDaysThisQuarter,
-      goal,
-    };
   }
 };
 
