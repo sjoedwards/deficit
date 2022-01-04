@@ -2,7 +2,6 @@ import moment from "moment";
 import { NextApiResponse } from "next";
 import { simpleMovingWeightAverage } from "../../tools/simple-moving-weight-average";
 import {
-  FitbitWeeklyCaloriesData,
   FitbitWeeklyWeightData,
   IExtendedRequest,
   IPredictServiceOptions,

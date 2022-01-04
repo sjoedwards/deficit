@@ -1,9 +1,5 @@
 import { NextApiResponse } from "next";
-import {
-  FitbitWeeklyWeightData,
-  IExtendedRequest,
-  IPredictServiceOptions,
-} from "./../../types/index";
+import { IExtendedRequest, IPredictServiceOptions } from "./../../types/index";
 import {
   ResolutionNames,
   DeficitGoalData,
