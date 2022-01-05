@@ -26,12 +26,6 @@ const deficitService = async (
   calories: Array<FitbitDailyCaloriesData>
 ) => {
   const caloriesCurrentQuarter = groupIntoQuarterlyCalories(calories);
-  const deficitsCurrentQuarter = caloriesCurrentQuarter.map(
-    ({ dateTime, deficit }) => ({
-      dateTime,
-      deficit,
-    })
-  );
 
   const averageDeficitCurrentQuarter = getAverageDeficit(
     caloriesCurrentQuarter

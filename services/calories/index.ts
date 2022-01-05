@@ -1,4 +1,3 @@
-import { NextApiResponse } from "next";
 import { CalorieResolutionType, IExtendedRequest } from "./../../types/index";
 import {
   ResolutionNames,
@@ -73,9 +72,6 @@ export const getMonthlyCalories = async (
 export const getCalories = async (
   request: IExtendedRequest
 ): Promise<Array<FitbitDailyCaloriesData>> => {
-  const headers = {
-    Authorization: `Bearer ${request?.state?.token}`,
-  };
   const caloriesResponse: Array<FitbitData> = await fitbitService.getCaloriesIn(
     request
   );
@@ -162,8 +158,7 @@ export const getWeeklyCalories = async (
 
 export const caloriesService = async <T extends ResolutionNames>(
   resolution: T,
-  request: IExtendedRequest,
-  response: NextApiResponse
+  request: IExtendedRequest
 ): Promise<CalorieResolutionType<T>> => {
   let calories: Array<FitbitDailyCaloriesData>;
   const cachedCalories: Array<FitbitDailyCaloriesData> | undefined = cache.get(

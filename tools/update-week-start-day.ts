@@ -1,8 +1,8 @@
 import moment from "moment";
-export const updateWeekStartDay = (startDay: number): void => {
+export const updateWeekStartDay = (startDay: number = 1): void => {
   moment.updateLocale("en-gb", {
     week: {
-      dow: 1, // First day of week is Monday
+      dow: startDay, // First day of week is Monday
     },
   });
 };
