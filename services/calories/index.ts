@@ -10,20 +10,20 @@ import {
 import moment from "moment";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
+import { endOfMonth, format, getISOWeek, getMonth } from "date-fns";
+import { filterDuplicates } from "../../tools/filter-duplicates";
 
 export const getMonthlyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
 ): Promise<Array<FitbitMonthlyCaloriesData>> => {
   const monthlyCalories = apiCalories
     // Get unique months
-    .map((entry) => {
-      return moment(entry.dateTime).locale("en-gb").month();
-    })
-    .filter((value, index, self) => self.indexOf(value) === index)
+    .map((entry) => getMonth(new Date(entry.dateTime)))
+    .filter(filterDuplicates)
     // Nested array of entries for each month
     .map((month) =>
       apiCalories.filter(
-        (entry) => moment(entry.dateTime).locale("en-gb").month() === month
+        (entry) => getMonth(new Date(entry.dateTime)) === month
       )
     )
     .map((monthlyCalories) => {
@@ -45,9 +45,10 @@ export const getMonthlyCalories = async (
         ).toFixed(0),
         // Find the month end date from the first value
         monthEnd: (() => {
-          return moment(Object.values(monthlyCalories)[0].dateTime)
-            .endOf("month")
-            .format("YYYY-MM-DD");
+          return format(
+            endOfMonth(new Date(Object.values(monthlyCalories)[0].dateTime)),
+            "yyyy-MM-dd"
+          );
         })(),
       };
 
@@ -61,9 +62,7 @@ export const getMonthlyCalories = async (
     })
     // Filter results from this month
     .filter(
-      (month) =>
-        month.monthEnd !==
-        moment().locale("en-gb").endOf("month").format("YYYY-MM-DD")
+      (month) => month.monthEnd !== format(endOfMonth(new Date()), "yyyy-MM-dd")
     );
 
   return monthlyCalories;
@@ -102,10 +101,8 @@ export const getWeeklyCalories = async (
 ): Promise<Array<FitbitWeeklyCaloriesData>> => {
   const weeklyCalories = apiCalories
     // Get unique weeks
-    .map((entry) => {
-      return moment(entry.dateTime).locale("en-gb").week();
-    })
-    .filter((value, index, self) => self.indexOf(value) === index)
+    .map((entry) => getISOWeek(new Date(entry.dateTime)))
+    .filter(filterDuplicates)
     // Nested array of entries for each week
     .map((week) => {
       const caloriesForWeek = apiCalories.filter(

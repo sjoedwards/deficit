@@ -11,7 +11,6 @@ import { monthlyCaloriesExpectedResponse } from "../../expected-responses/calori
 import { weeklyCaloriesExpectedResponse } from "../../expected-responses/calories/weekly";
 import { dailyCaloriesExpectedResponse } from "../../expected-responses/calories/daily";
 
-let realDateNow: () => number;
 const mock = new MockAdapter(axios);
 const calMockservice = calorieMock(mock);
 const weightMockService = weightMock(mock);
@@ -25,15 +24,15 @@ beforeEach(async () => {
   calMockservice.mockDefault();
   weightMockService.mockDefault();
   authMockService.mockDefault();
-  realDateNow = Date.now.bind(global.Date);
-  // stub date to 1 June 2021 22:57:05
-  global.Date.now = jest.fn().mockReturnValue(1622588225000);
+  //   // stub date to 1 June 2021 22:57:05
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(1622588225000));
   client = await testClient(caloriesHandler);
 });
 
 afterEach(() => {
   calMockservice.get().resetHistory();
-  global.Date.now = realDateNow;
+  jest.useRealTimers();
 });
 
 describe("Weight Route", () => {

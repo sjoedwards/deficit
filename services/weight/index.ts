@@ -11,6 +11,7 @@ import {
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
 import { endOfISOWeek, format } from "date-fns";
+import { filterDuplicates } from "../../tools/filter-duplicates";
 
 const getWeight = async (
   request: IExtendedRequest
@@ -66,7 +67,7 @@ export const getMonthlyWeight = async (
     .map((entry) => {
       return moment(entry.dateTime).locale("en-gb").month();
     })
-    .filter((value, index, self) => self.indexOf(value) === index)
+    .filter(filterDuplicates)
     // Nested array of entries for each week
     .map((month) =>
       apiWeight.filter(

@@ -1,5 +1,6 @@
 import moment from "moment";
 import { FitbitDailyCaloriesData } from "./../types/index";
+import { filterDuplicates } from "./filter-duplicates";
 
 const groupIntoMonthlyCalories = (
   apiCalories: Array<FitbitDailyCaloriesData>
@@ -10,7 +11,7 @@ const groupIntoMonthlyCalories = (
       .map((entry) => {
         return moment(entry.dateTime).locale("en-gb").month();
       })
-      .filter((value, index, self) => self.indexOf(value) === index)
+      .filter(filterDuplicates)
       // Nested array of entries for each month
       .map((month) =>
         apiCalories.filter(
