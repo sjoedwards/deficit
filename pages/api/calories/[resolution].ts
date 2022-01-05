@@ -19,7 +19,7 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
     const resolution = req?.query?.resolution as string;
 
     if (isResolution(resolution)) {
-      const result = await caloriesService(resolution, req, res);
+      const result = await caloriesService(resolution, req);
       res.json(result);
     } else {
       throw new createHTTPError[400]("Resolution not supported");
