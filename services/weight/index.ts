@@ -58,7 +58,7 @@ const getWeight = async (
   });
 };
 
-const getMonthlyWeight = async (
+export const getMonthlyWeight = async (
   apiWeight: Array<FitbitDailyWeightData>
 ): Promise<Array<FitbitMonthlyWeightData>> => {
   const monthlyWeight = apiWeight
@@ -98,7 +98,7 @@ const getMonthlyWeight = async (
   return monthlyWeight;
 };
 
-const getWeeklyWeight = async (
+export const getWeeklyWeight = async (
   apiWeight: Array<FitbitDailyWeightData>,
   decimalPlaces?: number
 ): Promise<Array<FitbitWeeklyWeightData>> => {

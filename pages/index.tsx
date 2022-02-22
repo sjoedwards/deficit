@@ -4,6 +4,8 @@ import React, { ReactElement, useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
 import { logError } from "../tools/log-error";
+import { FitbitDailyCaloriesData, FitbitDailyWeightData } from "../types";
+import { deficitService } from "../services/deficit";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -60,33 +62,36 @@ export default function Home(): ReactElement {
   useEffect(() => {
     const getDeficit = async () => {
       try {
-        const response = await axios.get<IDeficitResponse>("/api/deficit", {
-          maxRedirects: 0,
-          withCredentials: true,
-        });
+        const weight = (
+          await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")
+        ).data;
+        const calories = (
+          await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily")
+        ).data;
+        const response = await deficitService(weight, calories);
         console.log(response);
         const {
           averageDeficitCurrentMonth,
           predictedWeeklyWeightDiff,
           deficits,
           currentQuarter,
-        } = response?.data || {};
+        } = response || {};
         const { weightDiffKilos, deficitForRemainingDaysThisMonth } =
           predictedWeeklyWeightDiff?.noMovingAverage || {};
         setAverageDeficit(averageDeficitCurrentMonth);
-        setAverageDeficitRemaining(deficitForRemainingDaysThisMonth);
-        setWeightDiff(weightDiffKilos);
+        setAverageDeficitRemaining(deficitForRemainingDaysThisMonth || "");
+        setWeightDiff(weightDiffKilos || "");
         setDeficits(deficits);
         setAverageDeficitCurrentQuarter(
           `${currentQuarter.averageDeficitCurrentQuarter}`
         );
         setAverageDeficitRemainingCurrentQuarter(
           currentQuarter.predictedWeeklyWeightDiff.noMovingAverage
-            .deficitForRemainingDaysThisQuarter
+            .deficitForRemainingDaysThisQuarter || ""
         );
         setWeightDiffCurrentQuarter(
           currentQuarter.predictedWeeklyWeightDiff.noMovingAverage
-            .weightDiffKilos
+            .weightDiffKilos || ""
         );
       } catch (e) {
         if (e?.response?.status === 401) {

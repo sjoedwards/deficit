@@ -12,7 +12,7 @@ import moment from "moment";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
 
-const getMonthlyCalories = async (
+export const getMonthlyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
 ): Promise<Array<FitbitMonthlyCaloriesData>> => {
   const monthlyCalories = apiCalories
@@ -101,7 +101,7 @@ export const getCalories = async (
   return calories;
 };
 
-const getWeeklyCalories = async (
+export const getWeeklyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
 ): Promise<Array<FitbitWeeklyCaloriesData>> => {
   const weeklyCalories = apiCalories

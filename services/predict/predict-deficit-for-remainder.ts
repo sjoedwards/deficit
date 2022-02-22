@@ -1,9 +1,7 @@
-import { NextApiResponse } from "next";
-import { IExtendedRequest } from "./../../types/index";
+import { FitbitDailyCaloriesData } from "./../../types/index";
 import moment from "moment";
 import { getDeficitForWeightDiff } from "../../tools/get-deficit-for-weight-diff";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
-import { caloriesService } from "./../calories/index";
 import {
   differenceInCalendarDays,
   startOfQuarter,
@@ -18,8 +16,7 @@ const getDaysLeftInMonth = () => {
 };
 
 const predictDeficitForRemainderOfMonth = async (
-  request: IExtendedRequest,
-  response: NextApiResponse,
+  calories: Array<FitbitDailyCaloriesData>,
   gradient: number,
   intercept: number,
   goal: number
@@ -32,8 +29,7 @@ const predictDeficitForRemainderOfMonth = async (
     gradient
   );
   const totalMonthlyDeficitForGoal = daysInMonth * averegeDeficitForGoal;
-  const dailyFitBitData = await caloriesService("daily", request, response);
-  const monthlyDeficits = groupIntoMonthlyCalories(dailyFitBitData);
+  const monthlyDeficits = groupIntoMonthlyCalories(calories);
   const deficitsCurrentMonth = monthlyDeficits[monthlyDeficits.length - 1];
   const totalDeficitCurrentMonth = deficitsCurrentMonth.reduce(
     (agg, { deficit }) => agg + parseFloat(deficit),
@@ -48,8 +44,7 @@ const predictDeficitForRemainderOfMonth = async (
 };
 
 const predictDeficitForRemainderOfQuarter = async (
-  request: IExtendedRequest,
-  response: NextApiResponse,
+  calories: Array<FitbitDailyCaloriesData>,
   gradient: number,
   intercept: number,
   goal: number
@@ -69,8 +64,7 @@ const predictDeficitForRemainderOfQuarter = async (
     gradient
   );
   const totalQuarterlyDeficitForGoal = daysInQuater * averegeDeficitForGoal;
-  const dailyFitBitData = await caloriesService("daily", request, response);
-  const quarterlyDeficits = groupIntoQuarterlyCalories(dailyFitBitData);
+  const quarterlyDeficits = groupIntoQuarterlyCalories(calories);
   const deficitsCurrentQuarter = quarterlyDeficits;
   const totalDeficitCurrentQuarter = deficitsCurrentQuarter.reduce(
     (agg, { deficit }) => agg + parseFloat(deficit),
