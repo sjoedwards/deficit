@@ -1,37 +1,30 @@
-import { getCalories } from "../calories";
+import { caloriesService } from "../calories";
 import { IExtendedRequest, FitbitDailyCaloriesData } from "../../types/index";
 import { NextApiResponse } from "next";
-import { cache } from "../../cache";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
 import { predictService } from "../predict";
 import { groupIntoQuarterlyCalories } from "../../tools/get-calories-current-quarter";
-const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) =>
-  (
-    calories.reduce(
-      (sum: number, { deficit }) => sum + parseInt(`${deficit}`, 10),
-      0
-    ) / calories.length
-  ).toFixed(0);
+const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) => {
+  const caloriesTotal = calories.reduce(
+    (sum: number, { deficit }) => sum + parseInt(`${deficit}`, 10),
+    0
+  );
+  console.log(
+    "🚀 ~ file: index.ts ~ line 12 ~ getAverageDeficit ~ caloriesTotal",
+    calories.length
+  );
+  console.log(
+    "🚀 ~ file: index.ts ~ line 12 ~ getAverageDeficit ~ caloriesTotal",
+    caloriesTotal
+  );
+  return (caloriesTotal / calories.length).toFixed(0);
+};
 
 const deficitService = async (
   request: IExtendedRequest,
   response: NextApiResponse
 ) => {
-  let calories: Array<FitbitDailyCaloriesData>;
-  const cachedCalories: Array<FitbitDailyCaloriesData> | undefined = cache.get(
-    "calories",
-    request
-  );
-  if (cachedCalories) {
-    /* eslint-disable-next-line no-console */
-    console.log("Retrieving calories from cache");
-    calories = cachedCalories;
-  } else {
-    /* eslint-disable-next-line no-console */
-    console.log("Getting calories from fitbit");
-    calories = await getCalories(request);
-    cache.set("calories", calories, request);
-  }
+  const calories = await caloriesService("daily", request, response);
 
   const caloriesCurrentQuarter = groupIntoQuarterlyCalories(calories);
   const deficitsCurrentQuarter = caloriesCurrentQuarter.map(
