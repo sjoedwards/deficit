@@ -101,6 +101,10 @@ const predictService = async (
 
     const linearRegressionInformation =
       getLinearRegressionInformation(combinedValues);
+    console.log(
+      "🚀 ~ file: index.ts ~ line 103 ~ linearRegressionInformation",
+      linearRegressionInformation
+    );
     const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
       combinedValues,
       parseInt(deficit),
