@@ -1,5 +1,8 @@
-import { NextApiResponse } from "next";
-import { IExtendedRequest, IPredictServiceOptions } from "./../../types/index";
+import {
+  FitbitDailyCaloriesData,
+  FitbitDailyWeightData,
+  IPredictServiceOptions,
+} from "./../../types/index";
 import {
   ResolutionNames,
   DeficitGoalData,
@@ -7,44 +10,35 @@ import {
   PredictionData,
 } from "../../types";
 
-import { weightService } from "../weight";
 import {
   linearRegression,
   linearRegressionLine,
   rSquared,
 } from "simple-statistics";
 import moment from "moment";
-import { logWarning } from "../../tools/log-warning";
 import {
   predictDeficitForRemainderOfMonth,
   predictDeficitForRemainderOfQuarter,
 } from "./predict-deficit-for-remainder";
-import { caloriesService } from "../calories";
-import { addDataToState } from "./add-data-to-state";
+import { getMonthlyCalories } from "../calories";
 import { getWeightWithDiff } from "./get-weight-with-diff";
 import { getCombinedWeeklyValues } from "./get-combined-weekly-value";
+import { getMonthlyWeight } from "../weight";
 
 export const predictWeightDiffForDeficit = (
   combinedValues: Array<DeficitGoalData>,
   deficit: number,
-  request: IExtendedRequest,
   linearRegressionInformation: LinearRegressionInformation
 ): { rSquaredValue: number; weightDiff: number } => {
   const { rSquaredValue, regressionLine } = linearRegressionInformation || {};
   if (!rSquaredValue) {
-    logWarning(
-      `Determined RSquared value was falsey: ${rSquaredValue}`,
-      request
-    );
+    console.warn(`Determined RSquared value was falsey: ${rSquaredValue}`);
   }
 
   const weightDiff = regressionLine(deficit);
 
   if (!weightDiff) {
-    logWarning(
-      `Determined weightDiff value was falsey: ${rSquaredValue}`,
-      request
-    );
+    console.warn(`Determined weightDiff value was falsey: ${rSquaredValue}`);
   }
 
   return { rSquaredValue, weightDiff };
@@ -64,8 +58,8 @@ export const getLinearRegressionInformation = (
 };
 
 const predictService = async (
-  request: IExtendedRequest,
-  response: NextApiResponse,
+  dailyWeights: Array<FitbitDailyWeightData>,
+  dailyCalories: Array<FitbitDailyCaloriesData>,
   deficit: string,
   resolution: ResolutionNames,
   goal: number,
@@ -96,25 +90,30 @@ const predictService = async (
   if (isWeekly(resolution)) {
     const combinedValues = await getCombinedWeeklyValues(
       1,
-      request,
-      response,
+      dailyWeights,
+      dailyCalories,
       options
+    );
+    console.log(
+      "🚀 ~ file: index.ts ~ line 97 ~ combinedValues",
+      combinedValues
     );
 
     const linearRegressionInformation =
       getLinearRegressionInformation(combinedValues);
-
+    console.log(
+      "🚀 ~ file: index.ts ~ line 103 ~ linearRegressionInformation",
+      linearRegressionInformation
+    );
     const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
       combinedValues,
       parseInt(deficit),
-      request,
       linearRegressionInformation
     );
 
     const deficitForRemainingDaysThisMonth =
       await predictDeficitForRemainderOfMonth(
-        request,
-        response,
+        dailyCalories,
         linearRegressionInformation.gradient,
         linearRegressionInformation.intercept,
         goal
@@ -130,8 +129,8 @@ const predictService = async (
   if (isQuarterly(resolution)) {
     const combinedValues = await getCombinedWeeklyValues(
       1,
-      request,
-      response,
+      dailyWeights,
+      dailyCalories,
       options
     );
 
@@ -141,14 +140,12 @@ const predictService = async (
     const weeklyWeightDiffForDeficit = predictWeightDiffForDeficit(
       combinedValues,
       parseInt(deficit),
-      request,
       linearRegressionInformation
     );
 
     const deficitForRemainingDaysThisQuarter =
       await predictDeficitForRemainderOfQuarter(
-        request,
-        response,
+        dailyCalories,
         linearRegressionInformation.gradient,
         linearRegressionInformation.intercept,
         goal
@@ -162,9 +159,8 @@ const predictService = async (
   }
 
   if (isMonthly(resolution)) {
-    const calories = await caloriesService(resolution, request, response);
-    const weight = await weightService(resolution, request);
-    addDataToState(request, calories, weight);
+    const calories = await getMonthlyCalories(dailyCalories);
+    const weight = await getMonthlyWeight(dailyWeights);
 
     const weightWithDiff = getWeightWithDiff(weight);
 
@@ -192,7 +188,6 @@ const predictService = async (
     const monthlyDiffForDeficit = predictWeightDiffForDeficit(
       combinedValues,
       parseInt(deficit),
-      request,
       linearRegressionInformation
     );
 

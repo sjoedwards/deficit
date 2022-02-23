@@ -17,7 +17,6 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
   .get(async (req, res) => {
     updateWeekStartDay(1);
     const resolution = req?.query?.resolution as string;
-
     if (isResolution(resolution)) {
       const result = await weightService(resolution, req, 1);
       res.json(result);

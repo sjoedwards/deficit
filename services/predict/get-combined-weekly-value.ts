@@ -1,26 +1,25 @@
 import moment from "moment";
-import { NextApiResponse } from "next";
 import { simpleMovingWeightAverage } from "../../tools/simple-moving-weight-average";
 import {
+  FitbitDailyCaloriesData,
+  FitbitDailyWeightData,
   FitbitWeeklyWeightData,
-  IExtendedRequest,
   IPredictServiceOptions,
 } from "../../types";
-import { caloriesService } from "../calories";
-import { weightService } from "../weight";
-import { addDataToState } from "./add-data-to-state";
+import { getWeeklyCalories } from "../calories";
+import { getWeeklyWeight } from "../weight";
 import { getWeightWithDiff } from "./get-weight-with-diff";
 
 export const getCombinedWeeklyValues = async (
   deficitWeeksAgo: number,
-  request: IExtendedRequest,
-  response: NextApiResponse,
+  dailyWeights: Array<FitbitDailyWeightData>,
+  dailyCalories: Array<FitbitDailyCaloriesData>,
   options?: IPredictServiceOptions
 ) => {
-  const calories = await caloriesService("weekly", request, response);
-  const weight = await weightService("weekly", request);
-  addDataToState(request, calories, weight);
-  const weightWithDiff = getWeightWithDiff(weight) as FitbitWeeklyWeightData[];
+  const calories = await getWeeklyCalories(dailyCalories);
+  const weights = await getWeeklyWeight(dailyWeights);
+
+  const weightWithDiff = getWeightWithDiff(weights) as FitbitWeeklyWeightData[];
   const simpleWeightMovingAverage = options?.weightDiffMovingAverage
     ? simpleMovingWeightAverage(
         weightWithDiff,

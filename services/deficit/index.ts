@@ -1,6 +1,7 @@
-import { caloriesService } from "../calories";
-import { IExtendedRequest, FitbitDailyCaloriesData } from "../../types/index";
-import { NextApiResponse } from "next";
+import {
+  FitbitDailyCaloriesData,
+  FitbitDailyWeightData,
+} from "../../types/index";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
 import { predictService } from "../predict";
 import { groupIntoQuarterlyCalories } from "../../tools/get-calories-current-quarter";
@@ -21,11 +22,9 @@ const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) => {
 };
 
 const deficitService = async (
-  request: IExtendedRequest,
-  response: NextApiResponse
+  weights: Array<FitbitDailyWeightData>,
+  calories: Array<FitbitDailyCaloriesData>
 ) => {
-  const calories = await caloriesService("daily", request, response);
-
   const caloriesCurrentQuarter = groupIntoQuarterlyCalories(calories);
   const deficitsCurrentQuarter = caloriesCurrentQuarter.map(
     ({ dateTime, deficit }) => ({
@@ -50,8 +49,8 @@ const deficitService = async (
 
   const { weightDiff, rSquaredValue, deficitForRemainingDaysThisMonth } =
     (await predictService(
-      request,
-      response,
+      weights,
+      calories,
       averageDeficitCurrentMonth,
       "weekly",
       goal
@@ -62,8 +61,8 @@ const deficitService = async (
     deficitForRemainingDaysThisMonth:
       deficitForRemainingDaysThisMonthFixed3Point,
   } = (await predictService(
-    request,
-    response,
+    weights,
+    calories,
     averageDeficitCurrentMonth,
     "weekly",
     goal,
@@ -77,8 +76,8 @@ const deficitService = async (
     deficitForRemainingDaysThisMonth:
       deficitForRemainingDaysThisMonthFixed5Point,
   } = (await predictService(
-    request,
-    response,
+    weights,
+    calories,
     averageDeficitCurrentMonth,
     "weekly",
     goal,
@@ -89,8 +88,8 @@ const deficitService = async (
 
   const { weightDiff: weightDiffQuarter, deficitForRemainingDaysThisQuarter } =
     (await predictService(
-      request,
-      response,
+      weights,
+      calories,
       averageDeficitCurrentQuarter,
       "quarterly",
       goal
