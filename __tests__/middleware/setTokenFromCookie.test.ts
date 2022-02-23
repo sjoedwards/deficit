@@ -1,7 +1,7 @@
 import { testClient } from "./../utils/test-client";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import deficitHandler from "../../pages/api/deficit";
+import weightHandler from "../../pages/api/weight/[resolution]";
 import { createMockJWT } from "./../utils/create-mock-jwt";
 import { calorieMock } from "../pages/api/api-data/calories/mock-default-calorie-data";
 import { weightMock } from "../pages/api/api-data/weight/mock-default-weight-data";
@@ -34,7 +34,7 @@ afterEach(() => {
 });
 describe("setTokenFromCookie", () => {
   test("adds access & refresh tokens if call to refresh succeeds", async () => {
-    const client = await testClient(deficitHandler);
+    const client = await testClient(weightHandler, { resolution: "daily" });
     const response = await client
       .get("/api/")
       .set("Cookie", `refreshToken=${createMockJWT()}`);
@@ -44,7 +44,7 @@ describe("setTokenFromCookie", () => {
 
   test("removes refresh token if call to refresh fails", async () => {
     authMockService.mockFailure();
-    const client = await testClient(deficitHandler);
+    const client = await testClient(weightHandler);
     const response = await client
       .get("/api/")
       .set("Cookie", `refreshToken=${createMockJWT()}`);
@@ -54,7 +54,7 @@ describe("setTokenFromCookie", () => {
 
   test("logs the exception if call to refresh fails", async () => {
     authMockService.mockFailure();
-    const client = await testClient(deficitHandler);
+    const client = await testClient(weightHandler);
     await client.get("/api/").set("Cookie", `refreshToken=${createMockJWT()}`);
     expect(logError).toHaveBeenCalledWith(
       `Call to fitbit token endpoint failed: [{\"errorType\":\"invalid_client\",\"message\":\"Refresh Token Error\"}]`
