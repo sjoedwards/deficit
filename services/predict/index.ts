@@ -116,6 +116,7 @@ const predictService = async (
       ...weeklyWeightDiffForDeficit,
       deficitForRemainingDaysThisMonth,
       goal,
+      combinedValues,
     };
   }
 
@@ -148,6 +149,7 @@ const predictService = async (
       ...weeklyWeightDiffForDeficit,
       deficitForRemainingDaysThisQuarter,
       goal,
+      combinedValues,
     };
   }
 
@@ -182,7 +184,7 @@ const predictService = async (
       linearRegressionInformation
     );
 
-    return { ...monthlyDiffForDeficit, goal };
+    return { ...monthlyDiffForDeficit, goal, combinedValues };
   }
 };
 

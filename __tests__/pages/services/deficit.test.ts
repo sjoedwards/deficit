@@ -22,6 +22,10 @@ afterEach(() => {
 describe("Deficit handler", () => {
   it("should return the correct deficit information for a weekly resolution", async () => {
     const deficit = await deficitService(weight, calories);
+    console.log(
+      "🚀 ~ file: deficit.test.ts ~ line 25 ~ it ~ deficit",
+      JSON.stringify(deficit)
+    );
 
     expect(deficit).toEqual(deficitExpectedResponse);
   });
