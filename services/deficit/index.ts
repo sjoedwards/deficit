@@ -10,14 +10,6 @@ const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) => {
     (sum: number, { deficit }) => sum + parseInt(`${deficit}`, 10),
     0
   );
-  console.log(
-    "🚀 ~ file: index.ts ~ line 12 ~ getAverageDeficit ~ caloriesTotal",
-    calories.length
-  );
-  console.log(
-    "🚀 ~ file: index.ts ~ line 12 ~ getAverageDeficit ~ caloriesTotal",
-    caloriesTotal
-  );
   return (caloriesTotal / calories.length).toFixed(0);
 };
 
