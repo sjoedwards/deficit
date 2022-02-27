@@ -23,6 +23,7 @@ const getFitbitService = () => {
     method: EMethod = EMethod.GET
   ) => {
     const defaultHeaders = getDefaultHeaders(request);
+    console.log(`Requesting fitbit: ${method} ${url}`);
     return await axios({
       url,
       method,

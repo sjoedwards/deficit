@@ -1,4 +1,3 @@
-import moment from "moment";
 import {
   ResolutionNames,
   WeightResolutionType,
@@ -7,10 +6,16 @@ import {
   FitbitMonthlyWeightData,
   IExtendedRequest,
   APIFitbitWeightData,
-} from "./../../types/index";
+} from "./../../types";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { endOfISOWeek, format } from "date-fns";
+import {
+  endOfISOWeek,
+  endOfMonth,
+  format,
+  getMonth,
+  subMonths,
+} from "date-fns";
 import { filterDuplicates } from "../../tools/filter-duplicates";
 
 const getWeight = async (
@@ -18,10 +23,7 @@ const getWeight = async (
 ): Promise<Array<FitbitDailyWeightData>> => {
   const getDatesForNMonthsAgo = (monthsAgo: number) => {
     return Array.from({ length: monthsAgo }, (_, index) => {
-      return moment()
-        .subtract(index, "months")
-        .locale("en-gb")
-        .format("YYYY-MM-DD");
+      return format(subMonths(new Date(), index), "yyyy-MM-dd");
     }).reverse();
   };
 
@@ -64,15 +66,11 @@ export const getMonthlyWeight = async (
 ): Promise<Array<FitbitMonthlyWeightData>> => {
   const monthlyWeight = apiWeight
     // Get unique weeks
-    .map((entry) => {
-      return moment(entry.dateTime).locale("en-gb").month();
-    })
+    .map((entry) => getMonth(new Date(entry.dateTime)))
     .filter(filterDuplicates)
     // Nested array of entries for each week
     .map((month) =>
-      apiWeight.filter(
-        (entry) => moment(entry.dateTime).locale("en-gb").month() === month
-      )
+      apiWeight.filter((entry) => getMonth(new Date(entry.dateTime)) === month)
     )
     .map((monthlyWeight) => {
       return {
@@ -85,16 +83,15 @@ export const getMonthlyWeight = async (
         ).toFixed(1),
         // Find the week end date from the first value
         monthEnd: (() => {
-          return moment(Object.values(monthlyWeight)[0].dateTime)
-            .endOf("month")
-            .format("YYYY-MM-DD");
+          return format(
+            endOfMonth(new Date(Object.values(monthlyWeight)[0].dateTime)),
+            "yyyy-MM-dd"
+          );
         })(),
       };
     })
     .filter(
-      (month) =>
-        month.monthEnd !==
-        moment().locale("en-gb").endOf("month").format("YYYY-MM-DD")
+      (month) => month.monthEnd !== format(endOfMonth(new Date()), "yyyy-MM-dd")
     );
   return monthlyWeight;
 };

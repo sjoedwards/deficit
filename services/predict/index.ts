@@ -15,7 +15,6 @@ import {
   linearRegressionLine,
   rSquared,
 } from "simple-statistics";
-import moment from "moment";
 import {
   predictDeficitForRemainderOfMonth,
   predictDeficitForRemainderOfQuarter,
@@ -24,6 +23,7 @@ import { getMonthlyCalories } from "../calories";
 import { getWeightWithDiff } from "./get-weight-with-diff";
 import { getCombinedWeeklyValues } from "./get-combined-weekly-value";
 import { getMonthlyWeight } from "../weight";
+import { getMonth, subMonths } from "date-fns";
 
 export const predictWeightDiffForDeficit = (
   combinedValues: Array<DeficitGoalData>,
@@ -163,10 +163,8 @@ const predictService = async (
           // Find the caloriesResponse entry for the dateTime
           const deficit = calories.find(
             (entry) =>
-              entry.monthEnd ===
-              moment(monthEnd)
-                .subtract(deficitWeeksAgo, "month")
-                .format("YYYY-MM-DD")
+              getMonth(new Date(entry.monthEnd)) ===
+              getMonth(subMonths(new Date(monthEnd), deficitWeeksAgo))
           )?.deficit;
 
           return {
