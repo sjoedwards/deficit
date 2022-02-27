@@ -96,6 +96,7 @@ export interface PredictionData {
   goal: number;
   deficitForRemainingDaysThisMonth?: number;
   deficitForRemainingDaysThisQuarter?: number;
+  combinedValues: DeficitGoalData[];
 }
 
 export type WeightResolutionType<T> = T extends "daily"

@@ -33,7 +33,12 @@ const deficitService = async (
 
   const goal = -0.25;
 
-  const { weightDiff, rSquaredValue, deficitForRemainingDaysThisMonth } =
+  const {
+    combinedValues,
+    weightDiff,
+    rSquaredValue,
+    deficitForRemainingDaysThisMonth,
+  } =
     (await predictService(
       weights,
       calories,
@@ -42,6 +47,7 @@ const deficitService = async (
       goal
     )) || {};
   const {
+    combinedValues: combinedValues3Point,
     weightDiff: weightDiff3Point,
     rSquaredValue: rSquaredValue3Point,
     deficitForRemainingDaysThisMonth:
@@ -57,6 +63,7 @@ const deficitService = async (
     }
   )) || {};
   const {
+    combinedValues: combinedValues5Point,
     weightDiff: weightDiff5Point,
     rSquaredValue: rSquaredValue5Point,
     deficitForRemainingDaysThisMonth:
@@ -72,14 +79,17 @@ const deficitService = async (
     }
   )) || {};
 
-  const { weightDiff: weightDiffQuarter, deficitForRemainingDaysThisQuarter } =
-    (await predictService(
-      weights,
-      calories,
-      averageDeficitCurrentQuarter,
-      "quarterly",
-      goal
-    )) || {};
+  const {
+    combinedValues: combinedValuesQuarter,
+    weightDiff: weightDiffQuarter,
+    deficitForRemainingDaysThisQuarter,
+  } = (await predictService(
+    weights,
+    calories,
+    averageDeficitCurrentQuarter,
+    "quarterly",
+    goal
+  )) || {};
 
   const weightDiffFixed = weightDiff && weightDiff.toFixed(3);
   const deficitForRemainingDaysThisMonthFixed =
@@ -97,6 +107,7 @@ const deficitService = async (
         weightDiffKilos: weightDiffFixed,
         rSquaredValue: rSquaredValue && rSquaredValue.toFixed(3),
         deficitForRemainingDaysThisMonth: deficitForRemainingDaysThisMonthFixed,
+        combinedValues,
       },
       threePointMoving: {
         weightDiffKilos: weightDiff3Point && weightDiff3Point.toFixed(3),
@@ -104,6 +115,7 @@ const deficitService = async (
         deficitForRemainingDaysThisMonth:
           deficitForRemainingDaysThisMonthFixed3Point &&
           deficitForRemainingDaysThisMonthFixed3Point.toFixed(0),
+        combinedValues,
       },
       fivePointMoving: {
         weightDiffKilos: weightDiff5Point && weightDiff5Point.toFixed(3),
@@ -111,6 +123,7 @@ const deficitService = async (
         deficitForRemainingDaysThisMonth:
           deficitForRemainingDaysThisMonthFixed5Point &&
           deficitForRemainingDaysThisMonthFixed5Point.toFixed(0),
+        combinedValues,
       },
     },
     deficits: deficitsCurrentMonth,
@@ -122,6 +135,7 @@ const deficitService = async (
           rSquaredValue: rSquaredValue && rSquaredValue.toFixed(3),
           deficitForRemainingDaysThisQuarter:
             deficitForRemainingDaysThisQuarterFixed,
+          combinedValues,
         },
       },
     },
