@@ -1,18 +1,19 @@
 import { FitbitDailyCaloriesData } from "./../../types/index";
-import moment from "moment";
 import { getDeficitForWeightDiff } from "../../tools/get-deficit-for-weight-diff";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
 import {
   differenceInCalendarDays,
   startOfQuarter,
   lastDayOfQuarter,
+  differenceInDays,
+  endOfMonth,
+  getDaysInMonth,
 } from "date-fns";
 import { groupIntoQuarterlyCalories } from "../../tools/get-calories-current-quarter";
 
 const getDaysLeftInMonth = () => {
-  const endOfMonth = moment().endOf("month");
-  const today = moment();
-  return endOfMonth.diff(today, "days");
+  const today = new Date();
+  return differenceInDays(endOfMonth(today), today);
 };
 
 const predictDeficitForRemainderOfMonth = async (
@@ -21,7 +22,7 @@ const predictDeficitForRemainderOfMonth = async (
   intercept: number,
   goal: number
 ): Promise<number> => {
-  const daysInMonth = moment().daysInMonth();
+  const daysInMonth = getDaysInMonth(new Date());
   const daysLeftInMonth = getDaysLeftInMonth();
   const averegeDeficitForGoal = getDeficitForWeightDiff(
     goal,

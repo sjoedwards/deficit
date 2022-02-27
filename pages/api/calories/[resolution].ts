@@ -1,4 +1,3 @@
-import { updateWeekStartDay } from "./../../../tools/update-week-start-day";
 import { isResolution } from "./../../../tools/is-resolution";
 import createHTTPError from "http-errors";
 import { caloriesService } from "../../../services/calories";
@@ -15,11 +14,10 @@ const handler = nc<IExtendedRequest, NextApiResponse>({
   .use(setTokenFromCookieMiddleware)
   .use(authzMiddleware)
   .get(async (req, res) => {
-    updateWeekStartDay(1);
     const resolution = req?.query?.resolution as string;
 
     if (isResolution(resolution)) {
-      const result = await caloriesService(resolution, req, res);
+      const result = await caloriesService(resolution, req);
       res.json(result);
     } else {
       throw new createHTTPError[400]("Resolution not supported");

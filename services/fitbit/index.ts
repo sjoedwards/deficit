@@ -1,5 +1,5 @@
 import axios from "axios";
-import httpErrors from "http-errors";
+// import httpErrors from "http-errors";
 import {
   APIFitbitWeightData,
   EMethod,
@@ -9,9 +9,9 @@ import {
 } from "../../types";
 
 const getFitbitService = () => {
-  const fitbitErrorMap = {
-    401: httpErrors[401],
-  };
+  // const fitbitErrorMap = {
+  //   401: httpErrors[401],
+  // };
   const getDefaultHeaders = (request: IExtendedRequest) => ({
     Authorization: `Bearer ${request?.state?.token}`,
   });
@@ -23,6 +23,7 @@ const getFitbitService = () => {
     method: EMethod = EMethod.GET
   ) => {
     const defaultHeaders = getDefaultHeaders(request);
+    console.log(`Requesting fitbit: ${method} ${url}`);
     return await axios({
       url,
       method,
