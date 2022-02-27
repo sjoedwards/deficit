@@ -1,4 +1,4 @@
-import moment from "moment";
+import { getWeek, subWeeks } from "date-fns";
 import { simpleMovingWeightAverage } from "../../tools/simple-moving-weight-average";
 import {
   FitbitDailyCaloriesData,
@@ -35,8 +35,8 @@ export const getCombinedWeeklyValues = async (
       // Find the caloriesResponse entry for the dateTime
       const deficit = calories.find(
         (entry) =>
-          entry.weekEnd ===
-          moment(weekEnd).subtract(deficitWeeksAgo, "week").format("YYYY-MM-DD")
+          getWeek(new Date(entry.weekEnd)) ===
+          getWeek(subWeeks(new Date(weekEnd), deficitWeeksAgo))
       )?.deficit;
 
       return {

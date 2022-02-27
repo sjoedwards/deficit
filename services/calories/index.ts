@@ -7,10 +7,9 @@ import {
   FitbitMonthlyCaloriesData,
 } from "../../types/index";
 
-import moment from "moment";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { endOfMonth, format, getISOWeek, getMonth } from "date-fns";
+import { endOfISOWeek, endOfMonth, format, getMonth } from "date-fns";
 import { filterDuplicates } from "../../tools/filter-duplicates";
 
 export const getMonthlyCalories = async (
@@ -96,20 +95,24 @@ export const getCalories = async (
   return calories;
 };
 
+// Split into
 export const getWeeklyCalories = async (
   apiCalories: Array<FitbitDailyCaloriesData>
 ): Promise<Array<FitbitWeeklyCaloriesData>> => {
-  const weeklyCalories = apiCalories
-    // Get unique weeks
-    .map((entry) => getISOWeek(new Date(entry.dateTime)))
-    .filter(filterDuplicates)
-    // Nested array of entries for each week
-    .map((week) => {
-      const caloriesForWeek = apiCalories.filter(
-        (entry) => moment(entry.dateTime).locale("en-gb").week() === week
-      );
-      return caloriesForWeek;
-    })
+  const weeklyCalories = apiCalories.reduce<{
+    [key: string]: FitbitDailyCaloriesData[];
+  }>((acc, entry) => {
+    const endOfWeek = format(
+      endOfISOWeek(new Date(entry.dateTime)),
+      "yyyy-MM-dd"
+    );
+    const existingWeekInAcc = acc[endOfWeek] || [];
+    return {
+      ...acc,
+      [endOfWeek]: [...existingWeekInAcc, { ...entry, endOfWeek }],
+    };
+  }, {});
+  const reducedWeeklyCalories = Object.values(weeklyCalories)
     .map((weeklyCalories) => {
       const averageCalories = {
         // Reduce each week to a single value
@@ -129,9 +132,16 @@ export const getWeeklyCalories = async (
         ).toFixed(0),
         // Find the week end date from the first value
         weekEnd: (() => {
-          return moment(Object.values(weeklyCalories)[0].dateTime)
-            .endOf("isoWeek")
-            .format("YYYY-MM-DD");
+          return format(
+            endOfISOWeek(
+              new Date(
+                Object.values(weeklyCalories)[
+                  weeklyCalories.length - 1
+                ].dateTime
+              )
+            ),
+            "yyyy-MM-dd"
+          );
         })(),
       };
 
@@ -145,12 +155,10 @@ export const getWeeklyCalories = async (
     })
     // Filter results from this week
     .filter(
-      (week) =>
-        week.weekEnd !==
-        moment().locale("en-gb").endOf("isoWeek").format("YYYY-MM-DD")
+      (week) => week.weekEnd !== format(endOfISOWeek(new Date()), "yyyy-MM-dd")
     );
 
-  return weeklyCalories;
+  return reducedWeeklyCalories;
 };
 
 export const caloriesService = async <T extends ResolutionNames>(
