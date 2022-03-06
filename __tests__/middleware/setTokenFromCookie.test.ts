@@ -3,14 +3,13 @@ import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import weightHandler from "../../pages/api/weight/[resolution]";
 import { createMockJWT } from "./../utils/create-mock-jwt";
-import { calorieMock } from "../pages/api/api-data/calories/mock-default-calorie-data";
-import { weightMock } from "../pages/api/api-data/weight/mock-default-weight-data";
-import { authMock } from "../pages/api/api-data/auth/mock-default-auth-mock";
+import { calorieMock } from "../pages/api/mocks/backend/calories/mock-default-calorie-data";
+import { weightMock } from "../pages/api/mocks/backend/weight/mock-default-weight-data";
+import { authMock } from "../pages/api/mocks/backend/auth/mock-default-auth-mock";
 import { logError } from "../../tools/log-error";
 
 jest.mock("../../tools/log-error");
 
-let realDateNow: () => number;
 const mock = new MockAdapter(axios);
 const calMockservice = calorieMock(mock);
 const weightMockService = weightMock(mock);
