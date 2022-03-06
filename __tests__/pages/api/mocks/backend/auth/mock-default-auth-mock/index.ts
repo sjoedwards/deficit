@@ -1,6 +1,6 @@
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import { createMockJWT } from "../../../../../utils/create-mock-jwt";
+import { createMockJWT } from "../../../../../../utils/create-mock-jwt";
 
 interface Mock {
   get: () => MockAdapter;

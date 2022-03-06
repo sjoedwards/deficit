@@ -69,7 +69,7 @@ export default function Home(): ReactElement {
           await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily")
         ).data;
         const response = await deficitService(weight, calories);
-        console.log(response);
+
         const {
           averageDeficitCurrentMonth,
           predictedWeeklyWeightDiff,
