@@ -4,9 +4,13 @@ import React, { ReactElement, useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
 import { logError } from "../tools/log-error";
-import { FitbitDailyCaloriesData, FitbitDailyWeightData } from "../types";
+import {
+  FitbitDailyCaloriesData,
+  FitbitDailyWeightData,
+  IDeficitApiData,
+} from "../types";
 import { deficitService } from "../services/deficit";
-import { DeficitProvider } from "../src/contexts/useDeficit";
+import { DeficitProvider, useDeficit } from "../src/contexts/useDeficit";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -28,10 +32,6 @@ interface IDeficitResponse {
   };
 }
 
-interface IDeficitApiData {
-  dateTime: string;
-  deficit: string;
-}
 const getConfig = () => ({
   urls: {
     deficit: process.env.NEXT_PUBLIC_DEFICIT_URL || "",
@@ -43,7 +43,7 @@ const getConfig = () => ({
 });
 const config = getConfig();
 
-export default function Home(): ReactElement {
+function Home(): ReactElement {
   const [averageDeficit, setAverageDeficit] = useState("");
   const [averageDeficitCurrentQuarter, setAverageDeficitCurrentQuarter] =
     useState("");
@@ -59,7 +59,7 @@ export default function Home(): ReactElement {
   const [weightDiff, setWeightDiff] = useState("");
   const [error, setError] = useState(false);
   const [deficits, setDeficits] = useState<never[] | IDeficitApiData[]>([]);
-
+  const { dispatch, updated } = useDeficit();
   useEffect(() => {
     const getDeficit = async () => {
       try {
@@ -110,84 +110,87 @@ export default function Home(): ReactElement {
 
   return (
     <>
-      <DeficitProvider>
-        <div className={styles.container}>
-          <Head>
-            <title>Deficit</title>
-            <meta name="description" content="deficit" />
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
+      <div className={styles.container}>
+        <Head>
+          <title>Deficit</title>
+          <meta name="description" content="deficit" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
 
-          <main className={styles.main}>
-            <h1 className={styles.title}>Deficit info:</h1>
-            {error && <p>Theres been an error!</p>}
-            {!averageDeficit ? (
-              <p>Loading...</p>
-            ) : (
-              <>
-                <div>
-                  <p>
-                    Your deficit today is{" "}
-                    {deficits?.[deficits?.length - 1]?.deficit}
-                  </p>
-                </div>
-                <div>
-                  <h2>Current Month</h2>
-                </div>
-                <div>
-                  <p>
-                    You have an average daily deficit of {averageDeficit}{" "}
-                    calories (averaged over days this month)
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    You are predicted to{" "}
-                    {parseFloat(weightDiff) >= 0 ? "gain" : "lose"}{" "}
-                    {Math.abs(parseFloat(weightDiff))} kilograms per week, based
-                    off of your historic metabolic data.
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    You need a deficit of {deficitRemaining} for the rest of the
-                    days this month to lose your goal of 0.25 kilos
-                  </p>
-                </div>
+        <main className={styles.main}>
+          <h1 className={styles.title}>Deficit info:</h1>
+          {error && <p>Theres been an error!</p>}
+          {!averageDeficit ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <div>
+                <p>
+                  Your deficit today is{" "}
+                  {deficits?.[deficits?.length - 1]?.deficit}
+                </p>
+              </div>
+              <div>
+                <h2>Current Month</h2>
+              </div>
+              <div>
+                <p>
+                  You have an average daily deficit of {averageDeficit} calories
+                  (averaged over days this month)
+                </p>
+              </div>
+              <div>
+                <p>
+                  You are predicted to{" "}
+                  {parseFloat(weightDiff) >= 0 ? "gain" : "lose"}{" "}
+                  {Math.abs(parseFloat(weightDiff))} kilograms per week, based
+                  off of your historic metabolic data.
+                </p>
+              </div>
+              <div>
+                <p>
+                  You need a deficit of {deficitRemaining} for the rest of the
+                  days this month to lose your goal of 0.25 kilos
+                </p>
+              </div>
 
-                <div>
-                  <h2>Current Quarter</h2>
-                </div>
+              <div>
+                <h2>Current Quarter</h2>
+              </div>
 
-                <div>
-                  <p>
-                    You have an average daily deficit of{" "}
-                    {averageDeficitCurrentQuarter} calories (averaged over days
-                    this quarter)
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    You are predicted to{" "}
-                    {parseFloat(weightDiffCurrentQuarter) >= 0
-                      ? "gain"
-                      : "lose"}{" "}
-                    {Math.abs(parseFloat(weightDiffCurrentQuarter))} kilograms
-                    per week, based off of your historic metabolic data.
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    You need a deficit of {deficitRemainingCurrentQuarter} for
-                    the rest of the days this quarter to lose your goal of 0.25
-                    kilos
-                  </p>
-                </div>
-              </>
-            )}
-          </main>
-        </div>
-      </DeficitProvider>
+              <div>
+                <p>
+                  You have an average daily deficit of{" "}
+                  {averageDeficitCurrentQuarter} calories (averaged over days
+                  this quarter)
+                </p>
+              </div>
+              <div>
+                <p>
+                  You are predicted to{" "}
+                  {parseFloat(weightDiffCurrentQuarter) >= 0 ? "gain" : "lose"}{" "}
+                  {Math.abs(parseFloat(weightDiffCurrentQuarter))} kilograms per
+                  week, based off of your historic metabolic data.
+                </p>
+              </div>
+              <div>
+                <p>
+                  You need a deficit of {deficitRemainingCurrentQuarter} for the
+                  rest of the days this quarter to lose your goal of 0.25 kilos
+                </p>
+              </div>
+            </>
+          )}
+        </main>
+      </div>
     </>
+  );
+}
+
+export default function HomeWrapper(): ReactElement {
+  return (
+    <DeficitProvider>
+      <Home />
+    </DeficitProvider>
   );
 }

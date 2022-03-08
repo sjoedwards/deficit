@@ -1,6 +1,5 @@
 import React, { ReactElement, useReducer } from "react";
-
-const DeficitContext = React.createContext({});
+import { IDeficitApiData } from "../../types";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -22,9 +21,21 @@ const initialDeficitState = {
   status: EStatus.IDLE,
 };
 
-// What will be the type of action.payload here?
+enum EActionKind {
+  UPDATE_START = "UPDATE_START",
+  UPDATE_SUCCESS = "UPDATE_FINISH",
+  UPDATE_FAIL = "UPDATE_FAIL",
+}
+
+type Action = {
+  type: EActionKind;
+  payload: IDeficitApiData;
+};
+const DeficitContext = React.createContext<
+  { state: DeficitState; dispatch: React.Dispatch<Action> } | undefined
+>(undefined);
+
 function deficitReducer(state: DeficitState, action: { type: string }) {
-  // Start here
   console.log(
     "🚀 ~ file: useDeficit.tsx ~ line 6 ~ deficitReducer ~ action",
     action
@@ -58,27 +69,14 @@ const useDeficit = () => {
   return context;
 };
 
-// const updateDeficit = async (dispatch, deficit, updates) => {
-//   console.log(
-//     "🚀 ~ file: useDeficit.tsx ~ line 51 ~ updateDeficit ~ updates",
-//     updates
-//   );
-//   console.log(
-//     "🚀 ~ file: useDeficit.tsx ~ line 51 ~ updateDeficit ~ deficit",
-//     deficit
-//   );
-//   console.log(
-//     "🚀 ~ file: useDeficit.tsx ~ line 51 ~ updateDeficit ~ dispatch",
-//     dispatch
-//   );
-// Do datafetch here, i.e.
-// dispatch({ type: "start update", updates });
-// try {
-//   const updatedUser = await userClient.updateUser(user, updates);
-//   dispatch({ type: "finish update", updatedUser });
-// } catch (error) {
-//   dispatch({ type: "fail update", error });
-// }
-// };
+const updateDeficit = async (dispatch, updates) => {
+  dispatch({ type: "start update", updates });
+  try {
+    const updatedUser = await userClient.updateUser(user, updates);
+    dispatch({ type: "finish update", updatedUser });
+  } catch (error) {
+    dispatch({ type: "fail update", error });
+  }
+};
 
-export { DeficitProvider, useDeficit };
+export { DeficitProvider, useDeficit, updateDeficit };

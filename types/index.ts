@@ -131,3 +131,8 @@ export type CalorieResolutionType<T> = T extends "daily"
 export interface IPredictServiceOptions {
   weightDiffMovingAverage: number;
 }
+
+export interface IDeficitApiData {
+  dateTime: string;
+  deficit: string;
+}
