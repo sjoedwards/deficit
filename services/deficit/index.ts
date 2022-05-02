@@ -1,6 +1,7 @@
 import {
   FitbitDailyCaloriesData,
   FitbitDailyWeightData,
+  IDeficitServiceResponse,
 } from "../../types/index";
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
 import { predictService } from "../predict";
@@ -16,7 +17,7 @@ const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) => {
 const deficitService = async (
   weights: Array<FitbitDailyWeightData>,
   calories: Array<FitbitDailyCaloriesData>
-) => {
+): Promise<IDeficitServiceResponse> => {
   const caloriesCurrentQuarter = groupIntoQuarterlyCalories(calories);
 
   const averageDeficitCurrentQuarter = getAverageDeficit(
