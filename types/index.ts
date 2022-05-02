@@ -136,3 +136,39 @@ export interface IDeficitApiData {
   dateTime: string;
   deficit: string;
 }
+
+export interface IDeficitServiceResponse {
+  averageDeficitCurrentMonth: string;
+  predictedWeeklyWeightDiff: {
+    noMovingAverage: {
+      weightDiffKilos: string | 0 | undefined;
+      rSquaredValue: string | 0 | undefined;
+      deficitForRemainingDaysThisMonth: string | 0 | undefined;
+      combinedValues: DeficitGoalData[] | undefined;
+    };
+    threePointMoving: {
+      weightDiffKilos: string | 0 | undefined;
+      rSquaredValue: string | 0 | undefined;
+      deficitForRemainingDaysThisMonth: string | 0 | undefined;
+      combinedValues: DeficitGoalData[] | undefined;
+    };
+    fivePointMoving: {
+      weightDiffKilos: string | 0 | undefined;
+      rSquaredValue: string | 0 | undefined;
+      deficitForRemainingDaysThisMonth: string | 0 | undefined;
+      combinedValues: DeficitGoalData[] | undefined;
+    };
+  };
+  deficits: Array<IDeficitApiData>;
+  currentQuarter: {
+    averageDeficitCurrentQuarter: string;
+    predictedWeeklyWeightDiff: {
+      noMovingAverage: {
+        weightDiffKilos: string | 0 | undefined;
+        rSquaredValue: string | 0 | undefined;
+        deficitForRemainingDaysThisQuarter: string | 0 | undefined;
+        combinedValues: DeficitGoalData[] | undefined;
+      };
+    };
+  };
+}

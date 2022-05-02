@@ -1,5 +1,12 @@
+import axios from "axios";
 import React, { ReactElement, useReducer } from "react";
-import { IDeficitApiData } from "../../types";
+import { deficitService } from "../../services/deficit";
+import {
+  FitbitDailyCaloriesData,
+  FitbitDailyWeightData,
+  IDeficitServiceResponse,
+} from "../../types";
+import { stubbedCalories, stubbedWeight } from "../../__tests__/utils/stubs";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -7,14 +14,14 @@ enum EStatus {
   ERROR = "ERROR",
 }
 interface BaseState {
-  error?: string;
+  error?: unknown;
   status: EStatus;
 }
 
 interface DeficitState extends BaseState {
-  deficit?: {
-    test: "test";
-  };
+  calories?: FitbitDailyCaloriesData[];
+  weight?: FitbitDailyWeightData[];
+  deficit?: IDeficitServiceResponse;
 }
 
 const initialDeficitState = {
@@ -27,27 +34,55 @@ enum EActionKind {
   UPDATE_FAIL = "UPDATE_FAIL",
 }
 
-type Action = {
+type Action =
+  | SimpleAction
+  | UpdateSuccessActionPayload
+  | UpdateFailureActionPayload;
+
+type SimpleAction = {
   type: EActionKind;
-  payload: IDeficitApiData;
 };
+
+type UpdateSuccessActionPayload = {
+  type: EActionKind;
+  payload: {
+    calories: FitbitDailyCaloriesData[];
+    weight: FitbitDailyWeightData[];
+    deficit: IDeficitServiceResponse;
+  };
+};
+
+type UpdateFailureActionPayload = {
+  type: EActionKind;
+  error: unknown;
+};
+
 const DeficitContext = React.createContext<
   { state: DeficitState; dispatch: React.Dispatch<Action> } | undefined
 >(undefined);
 
-function deficitReducer(state: DeficitState, action: { type: string }) {
-  console.log(
-    "🚀 ~ file: useDeficit.tsx ~ line 6 ~ deficitReducer ~ action",
-    action
-  );
-  console.log(
-    "🚀 ~ file: useDeficit.tsx ~ line 6 ~ deficitReducer ~ state",
-    state
-  );
-  return {
-    status: EStatus.IDLE,
-  };
-}
+const deficitReducer: React.Reducer<DeficitState, Action> = (state, action) => {
+  switch (action.type) {
+    case EActionKind.UPDATE_FAIL: {
+      return {
+        ...state,
+        error: (action as UpdateFailureActionPayload).error,
+        status: EStatus.ERROR,
+      };
+    }
+    case EActionKind.UPDATE_SUCCESS: {
+      return {
+        calories: (action as UpdateSuccessActionPayload).payload.calories,
+        weight: (action as UpdateSuccessActionPayload).payload.weight,
+        deficit: (action as UpdateSuccessActionPayload).payload.deficit,
+        status: EStatus.IDLE,
+      };
+    }
+    default: {
+      return state;
+    }
+  }
+};
 
 const DeficitProvider = ({
   children,
@@ -69,14 +104,26 @@ const useDeficit = () => {
   return context;
 };
 
-const updateDeficit = async (dispatch, updates) => {
-  dispatch({ type: "start update", updates });
+const getInitialData = async (dispatch: React.Dispatch<Action>) => {
+  dispatch({ type: EActionKind.UPDATE_START });
   try {
-    const updatedUser = await userClient.updateUser(user, updates);
-    dispatch({ type: "finish update", updatedUser });
+    const stubbed = process.env.NEXT_PUBLIC_STUBBED;
+    const weight = stubbed
+      ? stubbedWeight
+      : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")).data;
+    const calories = stubbed
+      ? stubbedCalories
+      : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
+          .data;
+    const deficit = await deficitService(weight, calories);
+
+    dispatch({
+      type: EActionKind.UPDATE_SUCCESS,
+      payload: { weight, calories, deficit },
+    });
   } catch (error) {
-    dispatch({ type: "fail update", error });
+    dispatch({ type: EActionKind.UPDATE_FAIL, error });
   }
 };
 
-export { DeficitProvider, useDeficit, updateDeficit };
+export { DeficitProvider, useDeficit, getInitialData };
