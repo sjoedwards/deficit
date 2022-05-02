@@ -11,6 +11,7 @@ import {
 } from "../types";
 import { deficitService } from "../services/deficit";
 import { DeficitProvider, useDeficit } from "../src/contexts/useDeficit";
+import { stubbedCalories, stubbedWeight } from "../__tests__/utils/stubs";
 
 interface IDeficitResponse {
   averageDeficitCurrentMonth: string;
@@ -59,16 +60,20 @@ function Home(): ReactElement {
   const [weightDiff, setWeightDiff] = useState("");
   const [error, setError] = useState(false);
   const [deficits, setDeficits] = useState<never[] | IDeficitApiData[]>([]);
-  const { dispatch, updated } = useDeficit();
+  const { state, dispatch } = useDeficit();
+
   useEffect(() => {
     const getDeficit = async () => {
       try {
-        const weight = (
-          await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")
-        ).data;
-        const calories = (
-          await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily")
-        ).data;
+        const stubbed = process.env.NEXT_PUBLIC_STUBBED;
+        const weight = stubbed
+          ? stubbedWeight
+          : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily"))
+              .data;
+        const calories = stubbed
+          ? stubbedCalories
+          : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
+              .data;
         const response = await deficitService(weight, calories);
 
         const {
