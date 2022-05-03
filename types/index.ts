@@ -137,6 +137,12 @@ export interface IDeficitApiData {
   deficit: string;
 }
 
+export interface IAnnualWeightData {
+  year: string;
+  weightData: FitbitDailyWeightData[];
+  linearRegression?: LinearRegressionInformation;
+}
+
 export interface IDeficitServiceResponse {
   averageDeficitCurrentMonth: string;
   predictedWeeklyWeightDiff: {
