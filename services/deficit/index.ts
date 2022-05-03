@@ -6,6 +6,7 @@ import {
 import { groupIntoMonthlyCalories } from "../../tools/group-into-monthly-calories";
 import { predictService } from "../predict";
 import { groupIntoQuarterlyCalories } from "../../tools/get-calories-current-quarter";
+import AnnualWeightPredictionService from "../annualWeightPrediction/AnnualWeightPrediction";
 const getAverageDeficit = (calories: Array<FitbitDailyCaloriesData>) => {
   const caloriesTotal = calories.reduce(
     (sum: number, { deficit }) => sum + parseInt(`${deficit}`, 10),
@@ -99,6 +100,12 @@ const deficitService = async (
   const weightDiffQuarterFixed = weightDiffQuarter?.toFixed(3);
   const deficitForRemainingDaysThisQuarterFixed =
     deficitForRemainingDaysThisQuarter?.toFixed(0);
+
+  // New Annual Engine
+  const annualWeightPredictionService = new AnnualWeightPredictionService(
+    calories,
+    weights
+  );
 
   return {
     averageDeficitCurrentMonth,
