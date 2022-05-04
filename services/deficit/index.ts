@@ -106,6 +106,21 @@ const deficitService = async (
     calories,
     weights
   );
+  console.log(
+    "current month",
+    averageDeficitCurrentMonth,
+    annualWeightPredictionService.predictWeightDiffUsingAnnualData(
+      parseInt(averageDeficitCurrentMonth)
+    )
+  );
+
+  console.log(
+    "current quarter",
+    averageDeficitCurrentQuarter,
+    annualWeightPredictionService.predictWeightDiffUsingAnnualData(
+      parseInt(averageDeficitCurrentQuarter)
+    )
+  );
 
   return {
     averageDeficitCurrentMonth,

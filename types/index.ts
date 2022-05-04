@@ -141,6 +141,14 @@ export interface IAnnualWeightData {
   year: string;
   weightData: FitbitDailyWeightData[];
   linearRegression?: LinearRegressionInformation;
+  annualWeightDiff?: number;
+  annualDeficit?: number;
+}
+
+export interface IAnnualCaloriesData {
+  year: string;
+  caloriesData: FitbitDailyCaloriesData[];
+  averageDeficit: number;
 }
 
 export interface IDeficitServiceResponse {
