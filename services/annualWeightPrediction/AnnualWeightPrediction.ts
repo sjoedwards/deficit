@@ -128,7 +128,9 @@ class AnnualWeightPredictionService {
       };
     });
   }
-  public predictWeightDiffUsingAnnualData = (deficit: number): number => {
+  public predictWeightDiffUsingAnnualData = (
+    deficit: number
+  ): { perWeek: number; perMonth: number; perYear: number } => {
     const currentYearWeightData = this.annualWeightData.find((weightData) =>
       isThisYear(new Date(weightData.year))
     );
@@ -148,9 +150,17 @@ class AnnualWeightPredictionService {
     const coefficent =
       currentYearCaloriesData.averageDeficit /
       currentYearWeightData.annualWeightDiff;
-    return deficit / coefficent;
+
+    const perYear = deficit / coefficent;
+    const perMonth = perYear / 12;
+    const perWeek = perYear / 52;
+
+    return {
+      perYear,
+      perMonth,
+      perWeek,
+    };
   };
-  // Return annual, monthly and weekly
 }
 
 export default AnnualWeightPredictionService;

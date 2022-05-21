@@ -185,4 +185,18 @@ export interface IDeficitServiceResponse {
       };
     };
   };
+  annualEngine: {
+    prediction: {
+      currentWeek: {
+        perWeek: number;
+        perMonth: number;
+        perYear: number;
+      };
+      currentQuarter: {
+        perWeek: number;
+        perMonth: number;
+        perYear: number;
+      };
+    };
+  };
 }
