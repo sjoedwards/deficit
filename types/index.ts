@@ -137,6 +137,20 @@ export interface IDeficitApiData {
   deficit: string;
 }
 
+export interface IAnnualWeightData {
+  year: string;
+  weightData: FitbitDailyWeightData[];
+  linearRegression?: LinearRegressionInformation;
+  annualWeightDiff?: number;
+  annualDeficit?: number;
+}
+
+export interface IAnnualCaloriesData {
+  year: string;
+  caloriesData: FitbitDailyCaloriesData[];
+  averageDeficit: number;
+}
+
 export interface IDeficitServiceResponse {
   averageDeficitCurrentMonth: string;
   predictedWeeklyWeightDiff: {
@@ -168,6 +182,20 @@ export interface IDeficitServiceResponse {
         rSquaredValue: string | 0 | undefined;
         deficitForRemainingDaysThisQuarter: string | 0 | undefined;
         combinedValues: DeficitGoalData[] | undefined;
+      };
+    };
+  };
+  annualEngine: {
+    prediction: {
+      currentMonth: {
+        perWeek: number;
+        perMonth: number;
+        perYear: number;
+      };
+      currentQuarter: {
+        perWeek: number;
+        perMonth: number;
+        perYear: number;
       };
     };
   };

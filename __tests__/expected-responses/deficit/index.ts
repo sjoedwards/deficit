@@ -128,5 +128,19 @@ const deficitExpectedResponse = {
       },
     },
   },
+  annualEngine: {
+    prediction: {
+      currentMonth: {
+        perMonth: -0.16004734938286777,
+        perWeek: -0.03693400370373872,
+        perYear: -1.9205681925944134,
+      },
+      currentQuarter: {
+        perMonth: -0.10377499366377728,
+        perWeek: -0.02394807546087168,
+        perYear: -1.2452999239653273,
+      },
+    },
+  },
 };
 export { deficitExpectedResponse };
