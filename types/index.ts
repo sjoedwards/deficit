@@ -187,7 +187,7 @@ export interface IDeficitServiceResponse {
   };
   annualEngine: {
     prediction: {
-      currentWeek: {
+      currentMonth: {
         perWeek: number;
         perMonth: number;
         perYear: number;

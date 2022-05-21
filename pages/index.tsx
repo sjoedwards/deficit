@@ -108,6 +108,53 @@ function Home(): ReactElement {
                   kilos
                 </p>
               </div>
+              {/* TODO This needs testing */}
+              <div>
+                <p>
+                  <b>Annual Loss Prediction Engine For Monthly Deficit (kg)</b>
+                </p>
+                {/* TODO this needs to be made into a component */}
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <td>
+                          <p>Per Week</p>
+                        </td>
+                        <td>
+                          {state.deficit.annualEngine.prediction.currentMonth.perWeek.toFixed(
+                            2
+                          )}
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <p>Per Month</p>
+                        </td>
+                        <td>
+                          <p>
+                            {state.deficit.annualEngine.prediction.currentMonth.perMonth.toFixed(
+                              2
+                            )}
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <p>Per Year</p>
+                        </td>
+                        <p>
+                          {state.deficit.annualEngine.prediction.currentMonth.perYear.toFixed(
+                            2
+                          )}
+                        </p>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
               <div>
                 <h2>Current Quarter</h2>
@@ -148,6 +195,55 @@ function Home(): ReactElement {
                   for the rest of the days this quarter to lose your goal of
                   0.25 kilos
                 </p>
+              </div>
+
+              <div>
+                <p>
+                  <b>
+                    Annual Loss Prediction Engine For Quarterly Deficit (kg)
+                  </b>
+                </p>
+                {/* TODO this needs to be made into a component */}
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <td>
+                          <p>Per Week</p>
+                        </td>
+                        <td>
+                          {state.deficit.annualEngine.prediction.currentQuarter.perWeek.toFixed(
+                            2
+                          )}
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <p>Per Month</p>
+                        </td>
+                        <td>
+                          <p>
+                            {state.deficit.annualEngine.prediction.currentQuarter.perMonth.toFixed(
+                              2
+                            )}
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <p>Per Year</p>
+                        </td>
+                        <p>
+                          {state.deficit.annualEngine.prediction.currentQuarter.perYear.toFixed(
+                            2
+                          )}
+                        </p>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </>
           )}

@@ -159,7 +159,7 @@ const deficitService = async (
     },
     annualEngine: {
       prediction: {
-        currentWeek: annualWeightPredictionCurrentMonth,
+        currentMonth: annualWeightPredictionCurrentMonth,
         currentQuarter: annualWeightPredictionCurrentQuarter,
       },
     },
