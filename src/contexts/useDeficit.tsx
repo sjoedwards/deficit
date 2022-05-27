@@ -111,10 +111,7 @@ const getInitialData = async (dispatch: React.Dispatch<Action>) => {
     const weight = stubbed
       ? stubbedWeight
       : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")).data;
-    console.log(
-      "🚀 ~ file: useDeficit.tsx ~ line 112 ~ getInitialData ~ weight",
-      weight
-    );
+
     const calories = stubbed
       ? stubbedCalories
       : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
