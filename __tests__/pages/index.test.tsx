@@ -26,11 +26,10 @@ afterEach(() => {
   calMockservice.get().resetHistory();
 });
 
-// TODO fix
-describe.skip("Home Page", () => {
+describe("Home Page", () => {
   it("Renders Deficit after initial load", async () => {
     render(<Home />);
-    await act(() => {
+    act(() => {
       jest.advanceTimersByTime(5000);
     });
     await findByRole("heading", { name: /current month/i });

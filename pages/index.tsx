@@ -145,11 +145,13 @@ function Home(): ReactElement {
                         <td>
                           <p>Per Year</p>
                         </td>
-                        <p>
-                          {state.deficit.annualEngine.prediction.currentMonth.perYear.toFixed(
-                            2
-                          )}
-                        </p>
+                        <td>
+                          <p>
+                            {state.deficit.annualEngine.prediction.currentMonth.perYear.toFixed(
+                              2
+                            )}
+                          </p>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -235,11 +237,13 @@ function Home(): ReactElement {
                         <td>
                           <p>Per Year</p>
                         </td>
-                        <p>
-                          {state.deficit.annualEngine.prediction.currentQuarter.perYear.toFixed(
-                            2
-                          )}
-                        </p>
+                        <td>
+                          <p>
+                            {state.deficit.annualEngine.prediction.currentQuarter.perYear.toFixed(
+                              2
+                            )}
+                          </p>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
