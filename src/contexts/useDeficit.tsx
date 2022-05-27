@@ -99,7 +99,7 @@ const DeficitProvider = ({
 const useDeficit = () => {
   const context = React.useContext(DeficitContext);
   if (context === undefined) {
-    throw new Error("useCount must be used within a DeficitProvider");
+    throw new Error("useDeficit must be used within a DeficitProvider");
   }
   return context;
 };
@@ -107,10 +107,11 @@ const useDeficit = () => {
 const getInitialData = async (dispatch: React.Dispatch<Action>) => {
   dispatch({ type: EActionKind.UPDATE_START });
   try {
-    const stubbed = process.env.NEXT_PUBLIC_STUBBED;
+    const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
     const weight = stubbed
       ? stubbedWeight
       : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")).data;
+
     const calories = stubbed
       ? stubbedCalories
       : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
