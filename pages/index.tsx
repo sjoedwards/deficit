@@ -123,7 +123,7 @@ function Home(): ReactElement {
                         </td>
                         <td>
                           {state.deficit.annualEngine.prediction.currentMonth.perWeek.toFixed(
-                            2
+                            3
                           )}
                         </td>
                       </tr>
@@ -136,7 +136,7 @@ function Home(): ReactElement {
                         <td>
                           <p>
                             {state.deficit.annualEngine.prediction.currentMonth.perMonth.toFixed(
-                              2
+                              3
                             )}
                           </p>
                         </td>
@@ -148,7 +148,7 @@ function Home(): ReactElement {
                         <td>
                           <p>
                             {state.deficit.annualEngine.prediction.currentMonth.perYear.toFixed(
-                              2
+                              3
                             )}
                           </p>
                         </td>
@@ -215,7 +215,7 @@ function Home(): ReactElement {
                         </td>
                         <td>
                           {state.deficit.annualEngine.prediction.currentQuarter.perWeek.toFixed(
-                            2
+                            3
                           )}
                         </td>
                       </tr>
@@ -228,7 +228,7 @@ function Home(): ReactElement {
                         <td>
                           <p>
                             {state.deficit.annualEngine.prediction.currentQuarter.perMonth.toFixed(
-                              2
+                              3
                             )}
                           </p>
                         </td>
@@ -240,7 +240,7 @@ function Home(): ReactElement {
                         <td>
                           <p>
                             {state.deficit.annualEngine.prediction.currentQuarter.perYear.toFixed(
-                              2
+                              3
                             )}
                           </p>
                         </td>
