@@ -114,7 +114,10 @@ function Home(): ReactElement {
                   <b>Annual Loss Prediction Engine For Monthly Deficit (kg)</b>
                 </p>
                 {/* TODO this needs to be made into a component */}
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                <div
+                  data-testid="loss-prediction-monthly"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
                   <table>
                     <thead>
                       <tr>
@@ -206,7 +209,10 @@ function Home(): ReactElement {
                   </b>
                 </p>
                 {/* TODO this needs to be made into a component */}
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                <div
+                  data-testid="loss-prediction-quarterly"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
                   <table>
                     <thead>
                       <tr>
