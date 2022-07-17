@@ -9,7 +9,7 @@ import {
 
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { endOfISOWeek, endOfMonth, format, getMonth } from "date-fns";
+import { endOfWeek, endOfMonth, format, getMonth } from "date-fns";
 import { filterDuplicates } from "../../tools/filter-duplicates";
 
 export const getMonthlyCalories = async (
@@ -102,14 +102,17 @@ export const getWeeklyCalories = async (
   const weeklyCalories = apiCalories.reduce<{
     [key: string]: FitbitDailyCaloriesData[];
   }>((acc, entry) => {
-    const endOfWeek = format(
-      endOfISOWeek(new Date(entry.dateTime)),
+    const weekEnd = format(
+      endOfWeek(new Date(entry.dateTime), {
+        weekStartsOn: 1,
+      }),
       "yyyy-MM-dd"
     );
-    const existingWeekInAcc = acc[endOfWeek] || [];
+    const existingWeekInAcc = acc[weekEnd] || [];
+
     return {
       ...acc,
-      [endOfWeek]: [...existingWeekInAcc, { ...entry, endOfWeek }],
+      [weekEnd]: [...existingWeekInAcc, { ...entry, weekEnd }],
     };
   }, {});
   const reducedWeeklyCalories = Object.values(weeklyCalories)
@@ -133,12 +136,15 @@ export const getWeeklyCalories = async (
         // Find the week end date from the first value
         weekEnd: (() => {
           return format(
-            endOfISOWeek(
+            endOfWeek(
               new Date(
                 Object.values(weeklyCalories)[
                   weeklyCalories.length - 1
                 ].dateTime
-              )
+              ),
+              {
+                weekStartsOn: 1,
+              }
             ),
             "yyyy-MM-dd"
           );
@@ -155,7 +161,14 @@ export const getWeeklyCalories = async (
     })
     // Filter results from this week
     .filter(
-      (week) => week.weekEnd !== format(endOfISOWeek(new Date()), "yyyy-MM-dd")
+      (week) =>
+        week.weekEnd !==
+        format(
+          endOfWeek(new Date(), {
+            weekStartsOn: 1,
+          }),
+          "yyyy-MM-dd"
+        )
     );
 
   return reducedWeeklyCalories;
