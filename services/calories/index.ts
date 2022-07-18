@@ -95,16 +95,26 @@ export const getCalories = async (
   return calories;
 };
 
+interface GetWeeklyCaloriesOptions {
+  weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 | undefined;
+  excludeResultsFromThisWeek: boolean;
+}
+
 // Split into
-export const getWeeklyCalories = async (
-  apiCalories: Array<FitbitDailyCaloriesData>
-): Promise<Array<FitbitWeeklyCaloriesData>> => {
+export const getWeeklyCalories = (
+  apiCalories: Array<FitbitDailyCaloriesData>,
+  options: GetWeeklyCaloriesOptions = {
+    weekStartsOn: 1,
+    excludeResultsFromThisWeek: true,
+  }
+): Array<FitbitWeeklyCaloriesData> => {
+  const { weekStartsOn, excludeResultsFromThisWeek } = options;
   const weeklyCalories = apiCalories.reduce<{
     [key: string]: FitbitDailyCaloriesData[];
   }>((acc, entry) => {
     const weekEnd = format(
       endOfWeek(new Date(entry.dateTime), {
-        weekStartsOn: 1,
+        weekStartsOn,
       }),
       "yyyy-MM-dd"
     );
@@ -115,8 +125,8 @@ export const getWeeklyCalories = async (
       [weekEnd]: [...existingWeekInAcc, { ...entry, weekEnd }],
     };
   }, {});
-  const reducedWeeklyCalories = Object.values(weeklyCalories)
-    .map((weeklyCalories) => {
+  const reducedWeeklyCalories = Object.values(weeklyCalories).map(
+    (weeklyCalories) => {
       const averageCalories = {
         // Reduce each week to a single value
         calories: (
@@ -143,7 +153,7 @@ export const getWeeklyCalories = async (
                 ].dateTime
               ),
               {
-                weekStartsOn: 1,
+                weekStartsOn,
               }
             ),
             "yyyy-MM-dd"
@@ -158,20 +168,22 @@ export const getWeeklyCalories = async (
           parseInt(averageCalories.activityCalories)
         ).toString(),
       };
-    })
-    // Filter results from this week
-    .filter(
-      (week) =>
-        week.weekEnd !==
-        format(
-          endOfWeek(new Date(), {
-            weekStartsOn: 1,
-          }),
-          "yyyy-MM-dd"
-        )
-    );
+    }
+  );
 
-  return reducedWeeklyCalories;
+  if (!excludeResultsFromThisWeek) {
+    return reducedWeeklyCalories;
+  }
+  return reducedWeeklyCalories.filter(
+    (week) =>
+      week.weekEnd !==
+      format(
+        endOfWeek(new Date(), {
+          weekStartsOn,
+        }),
+        "yyyy-MM-dd"
+      )
+  );
 };
 
 export const caloriesService = async <T extends ResolutionNames>(
@@ -200,8 +212,7 @@ export const caloriesService = async <T extends ResolutionNames>(
     ): Array<FitbitDailyCaloriesData> => calories,
     weekly: async (
       calories: Array<FitbitDailyCaloriesData>
-    ): Promise<Array<FitbitWeeklyCaloriesData>> =>
-      await getWeeklyCalories(calories),
+    ): Promise<Array<FitbitWeeklyCaloriesData>> => getWeeklyCalories(calories),
     monthly: async (
       calories: Array<FitbitDailyCaloriesData>
     ): Promise<Array<FitbitMonthlyCaloriesData>> =>
