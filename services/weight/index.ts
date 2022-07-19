@@ -9,13 +9,7 @@ import {
 } from "./../../types";
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import {
-  endOfISOWeek,
-  endOfMonth,
-  format,
-  getMonth,
-  subMonths,
-} from "date-fns";
+import { endOfWeek, endOfMonth, format, getMonth, subMonths } from "date-fns";
 import { filterDuplicates } from "../../tools/filter-duplicates";
 
 const getWeight = async (
@@ -103,14 +97,14 @@ export const getWeeklyWeight = async (
   const weeklyWeights = apiWeight.reduce<{
     [key: string]: FitbitDailyWeightData[];
   }>((acc, entry) => {
-    const endOfWeek = format(
-      endOfISOWeek(new Date(entry.dateTime)),
+    const weekEnd = format(
+      endOfWeek(new Date(entry.dateTime), { weekStartsOn: 1 }),
       "yyyy-MM-dd"
     );
-    const existingWeekInAcc = acc[endOfWeek] || [];
+    const existingWeekInAcc = acc[weekEnd] || [];
     return {
       ...acc,
-      [endOfWeek]: [...existingWeekInAcc, { ...entry, endOfWeek }],
+      [weekEnd]: [...existingWeekInAcc, { ...entry, weekEnd }],
     };
   }, {});
   const reducedWeeklyWeights = Object.values(weeklyWeights)
@@ -130,10 +124,11 @@ export const getWeeklyWeight = async (
         // Find the week end date from the last value
         weekEnd: (() => {
           return format(
-            endOfISOWeek(
+            endOfWeek(
               new Date(
                 Object.values(weeklyWeight)[weeklyWeight.length - 1].dateTime
-              )
+              ),
+              { weekStartsOn: 1 }
             ),
             "yyyy-MM-dd"
           );
@@ -141,7 +136,9 @@ export const getWeeklyWeight = async (
       };
     })
     .filter(
-      (week) => week.weekEnd !== format(endOfISOWeek(new Date()), "yyyy-MM-dd")
+      (week) =>
+        week.weekEnd !==
+        format(endOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd")
     );
 
   return reducedWeeklyWeights;

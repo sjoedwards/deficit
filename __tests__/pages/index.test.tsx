@@ -74,6 +74,19 @@ describe("Home Page", () => {
     within(quarterlyLossPrediction).getByText(/Per Year/i);
     within(quarterlyLossPrediction).getByText(/-1.245/i);
 
+    findByRole("heading", { name: /Weekly Calories/i });
+    const weeklyCalories = getByTestId("weekly-calories");
+    within(weeklyCalories).getByText(
+      "Since last Friday, your average calorie intake was 3975 per day"
+    );
+
+    within(weeklyCalories).getByText(
+      "You need -1100 calories for the remaining days this week to hit your target of 1800 calories per day"
+    );
+
+    within(quarterlyLossPrediction).getByText(/Per Week/i);
+    within(quarterlyLossPrediction).getByText(/-0.024/i);
+
     expect(queryByText("Loading...")).not.toBeInTheDocument();
   });
 });
