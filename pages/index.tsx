@@ -10,6 +10,12 @@ import {
   useDeficit,
 } from "../src/contexts/useDeficit";
 
+import {
+  useWeeklyCaloriesRemaining,
+  WeeklyCaloriesRemainingProvider,
+  getInitialData as getIntialWeeklyCaloriesRemainingData,
+} from "../src/contexts/useWeeklyCaloriesRemaining";
+
 const getConfig = () => ({
   urls: {
     deficit: process.env.NEXT_PUBLIC_DEFICIT_URL || "",
@@ -22,7 +28,12 @@ const getConfig = () => ({
 const config = getConfig();
 
 function Home(): ReactElement {
+  const goal = 1800;
   const { state, dispatch } = useDeficit();
+  const {
+    state: weeklyCaloriesRemainingState,
+    dispatch: dispatchWeeklyCaloriesRemaining,
+  } = useWeeklyCaloriesRemaining();
 
   useEffect(() => {
     const getDeficit = async () => {
@@ -41,8 +52,37 @@ function Home(): ReactElement {
         await getInitialData(dispatch);
       }
     };
+
+    const getWeeklyCaloriesRemaining = async () => {
+      if (weeklyCaloriesRemainingState.error) {
+        if (
+          axios.isAxiosError(weeklyCaloriesRemainingState.error) &&
+          weeklyCaloriesRemainingState.error.response?.status === 401
+        ) {
+          Router.push(
+            `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${config.fitbit.clientId}&scope=activity%20nutrition%20weight&redirect_uri=${config.fitbit.redirectUri}`
+          );
+        } else {
+          logError(`${weeklyCaloriesRemainingState.error}`);
+        }
+      } else if (!weeklyCaloriesRemainingState.averageCaloriesThisWeek) {
+        await getIntialWeeklyCaloriesRemainingData(
+          dispatchWeeklyCaloriesRemaining,
+          goal
+        );
+      }
+    };
     getDeficit();
-  }, [dispatch, state.error, state.calories, state.weight]);
+    getWeeklyCaloriesRemaining();
+  }, [
+    dispatch,
+    dispatchWeeklyCaloriesRemaining,
+    state.error,
+    state.calories,
+    state.weight,
+    state.deficit,
+    weeklyCaloriesRemainingState,
+  ]);
 
   return (
     <>
@@ -60,6 +100,28 @@ function Home(): ReactElement {
             <p>Loading...</p>
           ) : (
             <>
+              <h2>Weekly Calories</h2>
+              {/* TODO this needs to be made into a component */}
+              <div
+                data-testid="weekly-calories"
+                style={{ display: "flex", justifyContent: "center" }}
+              >
+                <div>
+                  <p>
+                    Since last Friday, your average calorie intake was{" "}
+                    {weeklyCaloriesRemainingState.averageCaloriesThisWeek} per
+                    day
+                  </p>
+                </div>
+                <div>
+                  <p>
+                    You need{" "}
+                    {weeklyCaloriesRemainingState.caloriesRemainingPerDay}{" "}
+                    calories for the remaining days this week to hit your target
+                    of {goal} calories per day
+                  </p>
+                </div>
+              </div>
               <div>
                 <p>
                   Your deficit today is{" "}
@@ -265,8 +327,10 @@ function Home(): ReactElement {
 
 export default function HomeWrapper(): ReactElement {
   return (
-    <DeficitProvider>
-      <Home />
-    </DeficitProvider>
+    <WeeklyCaloriesRemainingProvider>
+      <DeficitProvider>
+        <Home />
+      </DeficitProvider>
+    </WeeklyCaloriesRemainingProvider>
   );
 }

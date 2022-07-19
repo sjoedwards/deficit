@@ -1,10 +1,8 @@
 import axios from "axios";
 import React, { ReactElement, useReducer } from "react";
-import {
-  FitbitDailyCaloriesData,
-  FitbitDailyWeightData,
-  IDeficitServiceResponse,
-} from "../../types";
+import { getWeeklyCalories } from "../../services/calories";
+import WeeklyCaloriesRemaining from "../../services/weeklyCaloriesRemaining";
+import { FitbitDailyCaloriesData } from "../../types";
 import { stubbedCalories } from "../../__tests__/utils/stubs";
 
 enum EStatus {
@@ -17,13 +15,12 @@ interface BaseState {
   status: EStatus;
 }
 
-interface DeficitState extends BaseState {
-  calories?: FitbitDailyCaloriesData[];
-  weight?: FitbitDailyWeightData[];
-  deficit?: IDeficitServiceResponse;
+interface WeeklyCaloriesRemainingState extends BaseState {
+  averageCaloriesThisWeek?: number;
+  caloriesRemainingPerDay?: number;
 }
 
-const initialDeficitState = {
+const initialWeeklyCaloriesRemainingState = {
   status: EStatus.IDLE,
 };
 
@@ -45,7 +42,8 @@ type SimpleAction = {
 type UpdateSuccessActionPayload = {
   type: EActionKind;
   payload: {
-    calories: FitbitDailyCaloriesData[];
+    averageCaloriesThisWeek: number;
+    caloriesRemainingPerDay: number;
   };
 };
 
@@ -54,11 +52,15 @@ type UpdateFailureActionPayload = {
   error: unknown;
 };
 
-const DeficitContext = React.createContext<
-  { state: DeficitState; dispatch: React.Dispatch<Action> } | undefined
+const WeeklyCaloriesRemainingContext = React.createContext<
+  | { state: WeeklyCaloriesRemainingState; dispatch: React.Dispatch<Action> }
+  | undefined
 >(undefined);
 
-const deficitReducer: React.Reducer<DeficitState, Action> = (state, action) => {
+const weeklyCaloriesRemainingReducer: React.Reducer<
+  WeeklyCaloriesRemainingState,
+  Action
+> = (state, action) => {
   switch (action.type) {
     case EActionKind.UPDATE_FAIL: {
       return {
@@ -69,7 +71,10 @@ const deficitReducer: React.Reducer<DeficitState, Action> = (state, action) => {
     }
     case EActionKind.UPDATE_SUCCESS: {
       return {
-        calories: (action as UpdateSuccessActionPayload).payload.calories,
+        averageCaloriesThisWeek: (action as UpdateSuccessActionPayload).payload
+          .averageCaloriesThisWeek,
+        caloriesRemainingPerDay: (action as UpdateSuccessActionPayload).payload
+          .caloriesRemainingPerDay,
         status: EStatus.IDLE,
       };
     }
@@ -79,27 +84,37 @@ const deficitReducer: React.Reducer<DeficitState, Action> = (state, action) => {
   }
 };
 
-const DeficitProvider = ({
+const WeeklyCaloriesRemainingProvider = ({
   children,
 }: {
   children: ReactElement;
 }): ReactElement => {
-  const [state, dispatch] = useReducer(deficitReducer, initialDeficitState);
+  const [state, dispatch] = useReducer(
+    weeklyCaloriesRemainingReducer,
+    initialWeeklyCaloriesRemainingState
+  );
   const value = { state, dispatch };
   return (
-    <DeficitContext.Provider value={value}>{children}</DeficitContext.Provider>
+    <WeeklyCaloriesRemainingContext.Provider value={value}>
+      {children}
+    </WeeklyCaloriesRemainingContext.Provider>
   );
 };
 
-const useDeficit = () => {
-  const context = React.useContext(DeficitContext);
+const useWeeklyCaloriesRemaining = () => {
+  const context = React.useContext(WeeklyCaloriesRemainingContext);
   if (context === undefined) {
-    throw new Error("useDeficit must be used within a DeficitProvider");
+    throw new Error(
+      "useWeeklyCaloriesRemaining must be used within a WeeklyCaloriesRemainingProvider"
+    );
   }
   return context;
 };
 
-const getInitialData = async (dispatch: React.Dispatch<Action>) => {
+const getInitialData = async (
+  dispatch: React.Dispatch<Action>,
+  goal: number
+) => {
   dispatch({ type: EActionKind.UPDATE_START });
   try {
     const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
@@ -109,13 +124,31 @@ const getInitialData = async (dispatch: React.Dispatch<Action>) => {
       : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
           .data;
 
+    const weeklyCaloriesRemainingService = new WeeklyCaloriesRemaining(
+      calories,
+      getWeeklyCalories,
+      5
+    );
+
+    const averageCaloriesThisWeek = parseInt(
+      weeklyCaloriesRemainingService.dailyCalorieDataForLastWeek.calories,
+      10
+    );
+
+    const caloriesRemainingPerDay =
+      weeklyCaloriesRemainingService.caloriesRequiredPerDayToMeetGoal(goal);
+
     dispatch({
       type: EActionKind.UPDATE_SUCCESS,
-      payload: { calories },
+      payload: { averageCaloriesThisWeek, caloriesRemainingPerDay },
     });
   } catch (error) {
     dispatch({ type: EActionKind.UPDATE_FAIL, error });
   }
 };
 
-export { DeficitProvider, useDeficit, getInitialData };
+export {
+  WeeklyCaloriesRemainingProvider,
+  useWeeklyCaloriesRemaining,
+  getInitialData,
+};
