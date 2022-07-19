@@ -77,7 +77,7 @@ describe("Home Page", () => {
     findByRole("heading", { name: /Weekly Calories/i });
     const weeklyCalories = getByTestId("weekly-calories");
     within(weeklyCalories).getByText(
-      "Since last Friday, your average calorie intake was 3975 per day"
+      "Since last Friday, your average calorie intake is 3975 per day"
     );
 
     within(weeklyCalories).getByText(
