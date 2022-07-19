@@ -100,15 +100,21 @@ function Home(): ReactElement {
             <p>Loading...</p>
           ) : (
             <>
-              <h2>Weekly Calories</h2>
+              <div>
+                <h2>Weekly Calories</h2>
+              </div>
               {/* TODO this needs to be made into a component */}
-              <div
-                data-testid="weekly-calories"
-                style={{ display: "flex", justifyContent: "center" }}
-              >
+              <div data-testid="weekly-calories">
                 <div>
                   <p>
-                    Since last Friday, your average calorie intake was{" "}
+                    Today, you have consumed{" "}
+                    {state.calories?.[state.calories.length - 1].calories}{" "}
+                    calories
+                  </p>
+                </div>
+                <div>
+                  <p>
+                    Since last Friday, your average calorie intake is{" "}
                     {weeklyCaloriesRemainingState.averageCaloriesThisWeek} per
                     day
                   </p>
@@ -123,20 +129,7 @@ function Home(): ReactElement {
                 </div>
               </div>
               <div>
-                <h2>Weekly Calories</h2>
-              </div>
-              {/* TODO this needs to be made into a component */}
-              <div data-testid="weekly-calories">
-                <p>
-                  Since last Friday, your average calorie intake was{" "}
-                  {weeklyCaloriesRemainingState.averageCaloriesThisWeek} per day
-                </p>
-                <p>
-                  You need{" "}
-                  {weeklyCaloriesRemainingState.caloriesRemainingPerDay}{" "}
-                  calories for the remaining days this week to hit your target
-                  of {goal} calories per day
-                </p>
+                <h2>Deficit today</h2>
               </div>
               <div>
                 <p>
