@@ -100,27 +100,21 @@ function Home(): ReactElement {
             <p>Loading...</p>
           ) : (
             <>
-              <h2>Weekly Calories</h2>
+              <div>
+                <h2>Weekly Calories</h2>
+              </div>
               {/* TODO this needs to be made into a component */}
-              <div
-                data-testid="weekly-calories"
-                style={{ display: "flex", justifyContent: "center" }}
-              >
-                <div>
-                  <p>
-                    Since last Friday, your average calorie intake was{" "}
-                    {weeklyCaloriesRemainingState.averageCaloriesThisWeek} per
-                    day
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    You need{" "}
-                    {weeklyCaloriesRemainingState.caloriesRemainingPerDay}{" "}
-                    calories for the remaining days this week to hit your target
-                    of {goal} calories per day
-                  </p>
-                </div>
+              <div data-testid="weekly-calories">
+                <p>
+                  Since last Friday, your average calorie intake was{" "}
+                  {weeklyCaloriesRemainingState.averageCaloriesThisWeek} per day
+                </p>
+                <p>
+                  You need{" "}
+                  {weeklyCaloriesRemainingState.caloriesRemainingPerDay}{" "}
+                  calories for the remaining days this week to hit your target
+                  of {goal} calories per day
+                </p>
               </div>
               <div>
                 <p>
