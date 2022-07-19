@@ -9,7 +9,7 @@ import {
 
 import { cache } from "../../cache";
 import { fitbitService } from "../fitbit";
-import { endOfWeek, endOfMonth, format, getMonth } from "date-fns";
+import { endOfWeek, endOfMonth, format, getMonth, isToday } from "date-fns";
 import { filterDuplicates } from "../../tools/filter-duplicates";
 
 export const getMonthlyCalories = async (
@@ -96,8 +96,8 @@ export const getCalories = async (
 };
 
 interface GetWeeklyCaloriesOptions {
-  weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 | undefined;
-  excludeResultsFromThisWeek: boolean;
+  weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | undefined;
+  excludeResultsFromThisWeek?: boolean;
 }
 
 // Split into
@@ -112,6 +112,9 @@ export const getWeeklyCalories = (
   const weeklyCalories = apiCalories.reduce<{
     [key: string]: FitbitDailyCaloriesData[];
   }>((acc, entry) => {
+    if (isToday(new Date(entry.dateTime))) {
+      return acc;
+    }
     const weekEnd = format(
       endOfWeek(new Date(entry.dateTime), {
         weekStartsOn,
