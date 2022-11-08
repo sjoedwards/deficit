@@ -10,6 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/material": "^5.10.11",
     "@types/cookies": "^0.7.6",
     "@types/jsonwebtoken": "^8.5.4",
     "axios": "^0.21.1",

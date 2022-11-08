@@ -4,17 +4,22 @@ import React, { ReactElement, useEffect } from "react";
 import axios from "axios";
 import Router from "next/router";
 import { logError } from "../tools/log-error";
+import { DeficitProvider, useDeficit } from "../src/contexts/useDeficit";
 import {
-  DeficitProvider,
-  getInitialData,
-  useDeficit,
-} from "../src/contexts/useDeficit";
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableContainer,
+} from "@mui/material";
 
 import {
   useWeeklyCaloriesRemaining,
   WeeklyCaloriesRemainingProvider,
   getInitialData as getIntialWeeklyCaloriesRemainingData,
 } from "../src/contexts/useWeeklyCaloriesRemaining";
+import { CaloriesProvider, useCalories } from "../src/contexts/useCalories";
 
 const getConfig = () => ({
   urls: {
@@ -30,6 +35,8 @@ const config = getConfig();
 function Home(): ReactElement {
   const goal = 1800;
   const { state, dispatch } = useDeficit();
+  const { state: caloriesState } = useCalories();
+  const { daily: dailyCalories, weekly: weeklyCalories } = caloriesState;
   const {
     state: weeklyCaloriesRemainingState,
     dispatch: dispatchWeeklyCaloriesRemaining,
@@ -48,8 +55,6 @@ function Home(): ReactElement {
         } else {
           logError(`${state.error}`);
         }
-      } else if (!state.deficit) {
-        await getInitialData(dispatch);
       }
     };
 
@@ -78,7 +83,7 @@ function Home(): ReactElement {
     dispatch,
     dispatchWeeklyCaloriesRemaining,
     state.error,
-    state.calories,
+    dailyCalories,
     state.weight,
     state.deficit,
     weeklyCaloriesRemainingState,
@@ -100,6 +105,33 @@ function Home(): ReactElement {
             <p>Loading...</p>
           ) : (
             <>
+              <h2>Metrics for last week</h2>
+              <TableContainer>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell variant="head">Calories</TableCell>
+                      <TableCell>Activity Calories</TableCell>
+                      <TableCell>Weight</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        {weeklyCalories?.[weeklyCalories.length - 1].calories}
+                      </TableCell>
+                      <TableCell>
+                        {
+                          weeklyCalories?.[weeklyCalories.length - 1]
+                            .activityCalories
+                        }
+                      </TableCell>
+                      <TableCell>Weight</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
               <div>
                 <h2>Weekly Calories</h2>
               </div>
@@ -108,7 +140,7 @@ function Home(): ReactElement {
                 <div>
                   <p>
                     Today, you have consumed{" "}
-                    {state.calories?.[state.calories.length - 1].calories}{" "}
+                    {dailyCalories?.[dailyCalories.length - 1].calories}{" "}
                     calories
                   </p>
                 </div>
@@ -337,9 +369,11 @@ function Home(): ReactElement {
 export default function HomeWrapper(): ReactElement {
   return (
     <WeeklyCaloriesRemainingProvider>
-      <DeficitProvider>
-        <Home />
-      </DeficitProvider>
+      <CaloriesProvider>
+        <DeficitProvider>
+          <Home />
+        </DeficitProvider>
+      </CaloriesProvider>
     </WeeklyCaloriesRemainingProvider>
   );
 }
