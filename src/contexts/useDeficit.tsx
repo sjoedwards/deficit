@@ -1,12 +1,8 @@
-import axios from "axios";
-import React, { ReactElement, useReducer } from "react";
+import React, { ReactElement, useEffect, useReducer } from "react";
 import { deficitService } from "../../services/deficit";
-import {
-  FitbitDailyCaloriesData,
-  FitbitDailyWeightData,
-  IDeficitServiceResponse,
-} from "../../types";
-import { stubbedCalories, stubbedWeight } from "../../__tests__/utils/stubs";
+import { FitbitDailyWeightData, IDeficitServiceResponse } from "../../types";
+import { useCalories } from "./useCalories";
+import { useWeight } from "./useWeight";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -19,7 +15,6 @@ interface BaseState {
 }
 
 interface DeficitState extends BaseState {
-  calories?: FitbitDailyCaloriesData[];
   weight?: FitbitDailyWeightData[];
   deficit?: IDeficitServiceResponse;
 }
@@ -46,8 +41,6 @@ type SimpleAction = {
 type UpdateSuccessActionPayload = {
   type: EActionKind;
   payload: {
-    calories: FitbitDailyCaloriesData[];
-    weight: FitbitDailyWeightData[];
     deficit: IDeficitServiceResponse;
   };
 };
@@ -72,8 +65,6 @@ const deficitReducer: React.Reducer<DeficitState, Action> = (state, action) => {
     }
     case EActionKind.UPDATE_SUCCESS: {
       return {
-        calories: (action as UpdateSuccessActionPayload).payload.calories,
-        weight: (action as UpdateSuccessActionPayload).payload.weight,
         deficit: (action as UpdateSuccessActionPayload).payload.deficit,
         status: EStatus.IDLE,
       };
@@ -91,6 +82,32 @@ const DeficitProvider = ({
 }): ReactElement => {
   const [state, dispatch] = useReducer(deficitReducer, initialDeficitState);
   const value = { state, dispatch };
+
+  const { state: caloriesState } = useCalories();
+  const { state: weightState } = useWeight();
+
+  const { daily: dailyCalories } = caloriesState;
+  const { daily: dailyWeights } = weightState;
+
+  useEffect(() => {
+    const updateDeficit = async () => {
+      if (!dailyCalories || !dailyWeights) {
+        return;
+      }
+      dispatch({ type: EActionKind.UPDATE_START });
+      try {
+        const deficit = await deficitService(dailyWeights, dailyCalories);
+
+        dispatch({
+          type: EActionKind.UPDATE_SUCCESS,
+          payload: { deficit },
+        });
+      } catch (error) {
+        dispatch({ type: EActionKind.UPDATE_FAIL, error });
+      }
+    };
+    updateDeficit();
+  }, [dailyCalories, dailyWeights]);
   return (
     <DeficitContext.Provider value={value}>{children}</DeficitContext.Provider>
   );
@@ -104,27 +121,4 @@ const useDeficit = () => {
   return context;
 };
 
-const getInitialData = async (dispatch: React.Dispatch<Action>) => {
-  dispatch({ type: EActionKind.UPDATE_START });
-  try {
-    const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
-    const weight = stubbed
-      ? stubbedWeight
-      : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")).data;
-
-    const calories = stubbed
-      ? stubbedCalories
-      : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
-          .data;
-    const deficit = await deficitService(weight, calories);
-
-    dispatch({
-      type: EActionKind.UPDATE_SUCCESS,
-      payload: { weight, calories, deficit },
-    });
-  } catch (error) {
-    dispatch({ type: EActionKind.UPDATE_FAIL, error });
-  }
-};
-
-export { DeficitProvider, useDeficit, getInitialData };
+export { DeficitProvider, useDeficit };
