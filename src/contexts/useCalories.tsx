@@ -52,7 +52,7 @@ type UpdateFailureActionPayload = {
   error: unknown;
 };
 
-const DeficitContext = React.createContext<
+const CaloriesContext = React.createContext<
   { state: CaloriesState; dispatch: React.Dispatch<Action> } | undefined
 >(undefined);
 
@@ -108,24 +108,18 @@ const CaloriesProvider = ({
     fetchCalories();
   }, []);
   return (
-    <DeficitContext.Provider value={value}>{children}</DeficitContext.Provider>
+    <CaloriesContext.Provider value={value}>
+      {children}
+    </CaloriesContext.Provider>
   );
 };
 
 const useCalories = () => {
-  const context = React.useContext(DeficitContext);
+  const context = React.useContext(CaloriesContext);
   if (context === undefined) {
     throw new Error("useCalories must be used within a caloriesProvider");
   }
   return context;
 };
 
-const getInitialData = async (dispatch: React.Dispatch<Action>) => {
-  dispatch({ type: EActionKind.UPDATE_START });
-  try {
-  } catch (error) {
-    dispatch({ type: EActionKind.UPDATE_FAIL, error });
-  }
-};
-
-export { CaloriesProvider, useCalories, getInitialData };
+export { CaloriesProvider, useCalories };

@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { ReactElement, useEffect, useReducer } from "react";
 import { deficitService } from "../../services/deficit";
 import { FitbitDailyWeightData, IDeficitServiceResponse } from "../../types";
-import { stubbedWeight } from "../../__tests__/utils/stubs";
 import { useCalories } from "./useCalories";
+import { useWeight } from "./useWeight";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -42,7 +41,6 @@ type SimpleAction = {
 type UpdateSuccessActionPayload = {
   type: EActionKind;
   payload: {
-    weight: FitbitDailyWeightData[];
     deficit: IDeficitServiceResponse;
   };
 };
@@ -67,7 +65,6 @@ const deficitReducer: React.Reducer<DeficitState, Action> = (state, action) => {
     }
     case EActionKind.UPDATE_SUCCESS: {
       return {
-        weight: (action as UpdateSuccessActionPayload).payload.weight,
         deficit: (action as UpdateSuccessActionPayload).payload.deficit,
         status: EStatus.IDLE,
       };
@@ -87,35 +84,30 @@ const DeficitProvider = ({
   const value = { state, dispatch };
 
   const { state: caloriesState } = useCalories();
+  const { state: weightState } = useWeight();
 
   const { daily: dailyCalories } = caloriesState;
+  const { daily: dailyWeights } = weightState;
 
   useEffect(() => {
     const updateDeficit = async () => {
-      if (!dailyCalories) {
+      if (!dailyCalories || !dailyWeights) {
         return;
       }
       dispatch({ type: EActionKind.UPDATE_START });
       try {
-        const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
-        const weight = stubbed
-          ? stubbedWeight
-          : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily"))
-              .data;
-
-        const deficit = await deficitService(weight, dailyCalories);
+        const deficit = await deficitService(dailyWeights, dailyCalories);
 
         dispatch({
           type: EActionKind.UPDATE_SUCCESS,
-          // todo: remove weight and calories here
-          payload: { weight, deficit },
+          payload: { deficit },
         });
       } catch (error) {
         dispatch({ type: EActionKind.UPDATE_FAIL, error });
       }
     };
     updateDeficit();
-  }, [dailyCalories]);
+  }, [dailyCalories, dailyWeights]);
   return (
     <DeficitContext.Provider value={value}>{children}</DeficitContext.Provider>
   );

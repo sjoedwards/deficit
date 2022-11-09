@@ -77,49 +77,70 @@ const weightReducer: React.Reducer<WeightState, Action> = (state, action) => {
   }
 };
 
-const weightProvider = ({
+const WeightProvider = ({
   children,
+  decimalPlaces = 2,
 }: {
   children: ReactElement;
+  decimalPlaces?: number;
 }): ReactElement => {
-  const [WeightState, dispatch] = useReducer(weightReducer, initialWeightState);
-  const value = { state: WeightState, dispatch };
+  const [weightState, dispatch] = useReducer(weightReducer, initialWeightState);
+  const value = { state: weightState, dispatch };
 
   useEffect(() => {
     const fetchWeight = async () => {
       dispatch({ type: EActionKind.UPDATE_START });
       const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
-      const dailyWeight = stubbed
+      const roundNumericToDecimalPlaces = (
+        value: string,
+        decimalPlacesArg: number
+      ): string => parseFloat(value).toFixed(decimalPlacesArg);
+
+      const dailyWeights = stubbed
         ? stubbedWeight
         : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")).data;
-      const weeklyWeight = await getWeeklyWeight(dailyWeight);
+
+      const weeklyWeights = await getWeeklyWeight(dailyWeights);
+
+      const isNotUndefined = <T,>(value: T | undefined): value is T =>
+        typeof value !== "undefined";
+
+      const roundValue = <T, K extends keyof T>(entries: T[], key: K) =>
+        entries
+          .map((weightEntry) => {
+            const test = weightEntry[key];
+            if (typeof test === "string") {
+              return {
+                ...weightEntry,
+                [key]: roundNumericToDecimalPlaces(test, decimalPlaces),
+              };
+            }
+          })
+          .filter(isNotUndefined);
+
       dispatch({
         type: EActionKind.UPDATE_SUCCESS,
-        payload: { weight: { daily: dailyWeight, weekly: weeklyWeight } },
+        payload: {
+          weight: {
+            daily: roundValue(dailyWeights, "weight"),
+            weekly: roundValue(weeklyWeights, "weight"),
+          },
+        },
       });
     };
     fetchWeight();
   }, []);
   return (
-    // Start here
     <WeightContext.Provider value={value}>{children}</WeightContext.Provider>
   );
 };
 
-const useweight = () => {
+const useWeight = () => {
   const context = React.useContext(WeightContext);
   if (context === undefined) {
-    throw new Error("useweight must be used within a weightProvider");
+    throw new Error("useWeight must be used within a weightProvider");
   }
   return context;
 };
 
-const getInitialData = async (dispatch: React.Dispatch<Action>) => {
-  dispatch({ type: EActionKind.UPDATE_START });
-  try {
-  } catch (error) {
-    dispatch({ type: EActionKind.UPDATE_FAIL, error });
-  }
-};
-
-export { weightProvider, useweight, getInitialData };
+export { WeightProvider, useWeight };

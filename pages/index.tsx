@@ -20,6 +20,7 @@ import {
   getInitialData as getIntialWeeklyCaloriesRemainingData,
 } from "../src/contexts/useWeeklyCaloriesRemaining";
 import { CaloriesProvider, useCalories } from "../src/contexts/useCalories";
+import { useWeight, WeightProvider } from "../src/contexts/useWeight";
 
 const getConfig = () => ({
   urls: {
@@ -34,9 +35,12 @@ const config = getConfig();
 
 function Home(): ReactElement {
   const goal = 1800;
-  const { state, dispatch } = useDeficit();
   const { state: caloriesState } = useCalories();
+  const { state: weightState } = useWeight();
+  const { state, dispatch } = useDeficit();
   const { daily: dailyCalories, weekly: weeklyCalories } = caloriesState;
+  const { weekly: weeklyWeight } = weightState;
+
   const {
     state: weeklyCaloriesRemainingState,
     dispatch: dispatchWeeklyCaloriesRemaining,
@@ -126,7 +130,9 @@ function Home(): ReactElement {
                             .activityCalories
                         }
                       </TableCell>
-                      <TableCell>Weight</TableCell>
+                      <TableCell>
+                        {weeklyWeight?.[weeklyWeight.length - 1].weight}
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -370,9 +376,11 @@ export default function HomeWrapper(): ReactElement {
   return (
     <WeeklyCaloriesRemainingProvider>
       <CaloriesProvider>
-        <DeficitProvider>
-          <Home />
-        </DeficitProvider>
+        <WeightProvider>
+          <DeficitProvider>
+            <Home />
+          </DeficitProvider>
+        </WeightProvider>
       </CaloriesProvider>
     </WeeklyCaloriesRemainingProvider>
   );
