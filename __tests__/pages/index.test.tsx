@@ -12,7 +12,6 @@ const weightMockService = weightMock(mock);
 const { findByRole, queryByText, getByText, getByTestId } = screen;
 
 // This sets the mock adapter on the default instance
-
 beforeEach(async () => {
   calMockservice.mockDefault();
   weightMockService.mockDefault();

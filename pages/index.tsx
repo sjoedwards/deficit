@@ -21,7 +21,6 @@ import {
 } from "../src/contexts/useWeeklyCaloriesRemaining";
 import { CaloriesProvider, useCalories } from "../src/contexts/useCalories";
 import { useWeight, WeightProvider } from "../src/contexts/useWeight";
-
 const getConfig = () => ({
   urls: {
     deficit: process.env.NEXT_PUBLIC_DEFICIT_URL || "",
@@ -30,11 +29,12 @@ const getConfig = () => ({
     clientId: process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID || "",
     redirectUri: process.env.NEXT_PUBLIC_FITBIT_REDIRECT_URI,
   },
+  goal: process.env.NEXT_PUBLIC_GOAL || "2000",
 });
 const config = getConfig();
 
 function Home(): ReactElement {
-  const goal = 2000;
+  const goal = parseInt(config.goal, 10);
   const { state: caloriesState } = useCalories();
   const { state: weightState } = useWeight();
   const { state, dispatch } = useDeficit();

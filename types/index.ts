@@ -200,3 +200,31 @@ export interface IDeficitServiceResponse {
     };
   };
 }
+
+// Shared action types
+
+export enum EActionKind {
+  UPDATE_START = "UPDATE_START",
+  UPDATE_SUCCESS = "UPDATE_FINISH",
+  UPDATE_FAIL = "UPDATE_FAIL",
+}
+
+export type UpdateFailureActionPayload = {
+  type: EActionKind;
+  error: unknown;
+};
+
+export type SimpleAction = {
+  type: EActionKind;
+};
+
+export enum EStatus {
+  PENDING = "PENDING",
+  IDLE = "IDLE",
+  ERROR = "ERROR",
+}
+
+export interface BaseState {
+  error?: unknown;
+  status: EStatus;
+}

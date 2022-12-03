@@ -1,18 +1,16 @@
 import React, { ReactElement, useEffect, useReducer } from "react";
 import { deficitService } from "../../services/deficit";
-import { FitbitDailyWeightData, IDeficitServiceResponse } from "../../types";
+import {
+  BaseState,
+  EActionKind,
+  EStatus,
+  FitbitDailyWeightData,
+  IDeficitServiceResponse,
+  SimpleAction,
+  UpdateFailureActionPayload,
+} from "../../types";
 import { useCalories } from "./useCalories";
 import { useWeight } from "./useWeight";
-
-enum EStatus {
-  PENDING = "PENDING",
-  IDLE = "IDLE",
-  ERROR = "ERROR",
-}
-interface BaseState {
-  error?: unknown;
-  status: EStatus;
-}
 
 interface DeficitState extends BaseState {
   weight?: FitbitDailyWeightData[];
@@ -23,31 +21,16 @@ const initialDeficitState = {
   status: EStatus.IDLE,
 };
 
-enum EActionKind {
-  UPDATE_START = "UPDATE_START",
-  UPDATE_SUCCESS = "UPDATE_FINISH",
-  UPDATE_FAIL = "UPDATE_FAIL",
-}
-
 type Action =
   | SimpleAction
   | UpdateSuccessActionPayload
   | UpdateFailureActionPayload;
-
-type SimpleAction = {
-  type: EActionKind;
-};
 
 type UpdateSuccessActionPayload = {
   type: EActionKind;
   payload: {
     deficit: IDeficitServiceResponse;
   };
-};
-
-type UpdateFailureActionPayload = {
-  type: EActionKind;
-  error: unknown;
 };
 
 const DeficitContext = React.createContext<
