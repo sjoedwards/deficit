@@ -34,7 +34,7 @@ const getConfig = () => ({
 const config = getConfig();
 
 function Home(): ReactElement {
-  const goal = 1800;
+  const goal = 2000;
   const { state: caloriesState } = useCalories();
   const { state: weightState } = useWeight();
   const { state, dispatch } = useDeficit();
