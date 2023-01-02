@@ -191,12 +191,12 @@ export interface IDeficitServiceResponse {
         perWeek: number;
         perMonth: number;
         perYear: number;
-      };
+      } | null;
       currentQuarter: {
         perWeek: number;
         perMonth: number;
         perYear: number;
-      };
+      } | null;
     };
   };
 }

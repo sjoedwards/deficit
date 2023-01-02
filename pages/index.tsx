@@ -234,7 +234,7 @@ function Home(): ReactElement {
                           <p>Per Week</p>
                         </td>
                         <td>
-                          {state.deficit.annualEngine.prediction.currentMonth.perWeek.toFixed(
+                          {state.deficit.annualEngine.prediction.currentMonth?.perWeek.toFixed(
                             3
                           )}
                         </td>
@@ -247,7 +247,7 @@ function Home(): ReactElement {
                         </td>
                         <td>
                           <p>
-                            {state.deficit.annualEngine.prediction.currentMonth.perMonth.toFixed(
+                            {state.deficit.annualEngine.prediction.currentMonth?.perMonth.toFixed(
                               3
                             )}
                           </p>
@@ -259,7 +259,7 @@ function Home(): ReactElement {
                         </td>
                         <td>
                           <p>
-                            {state.deficit.annualEngine.prediction.currentMonth.perYear.toFixed(
+                            {state.deficit.annualEngine.prediction.currentMonth?.perYear.toFixed(
                               3
                             )}
                           </p>
@@ -329,7 +329,7 @@ function Home(): ReactElement {
                           <p>Per Week</p>
                         </td>
                         <td>
-                          {state.deficit.annualEngine.prediction.currentQuarter.perWeek.toFixed(
+                          {state.deficit.annualEngine.prediction.currentQuarter?.perWeek.toFixed(
                             3
                           )}
                         </td>
@@ -342,7 +342,7 @@ function Home(): ReactElement {
                         </td>
                         <td>
                           <p>
-                            {state.deficit.annualEngine.prediction.currentQuarter.perMonth.toFixed(
+                            {state.deficit.annualEngine.prediction.currentQuarter?.perMonth.toFixed(
                               3
                             )}
                           </p>
@@ -354,7 +354,7 @@ function Home(): ReactElement {
                         </td>
                         <td>
                           <p>
-                            {state.deficit.annualEngine.prediction.currentQuarter.perYear.toFixed(
+                            {state.deficit.annualEngine.prediction.currentQuarter?.perYear.toFixed(
                               3
                             )}
                           </p>
