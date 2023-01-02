@@ -130,7 +130,7 @@ class AnnualWeightPredictionService {
   }
   public predictWeightDiffUsingAnnualData = (
     deficit: number
-  ): { perWeek: number; perMonth: number; perYear: number } => {
+  ): { perWeek: number; perMonth: number; perYear: number } | null => {
     const currentYearWeightData = this.annualWeightData.find((weightData) =>
       isThisYear(new Date(weightData.year))
     );
@@ -139,13 +139,15 @@ class AnnualWeightPredictionService {
     );
 
     if (!currentYearWeightData || !currentYearCaloriesData) {
-      throw new Error(
+      console.warn(
         "Cannot find weight or calorie information for current year"
       );
+      return null;
     }
 
     if (!currentYearWeightData.annualWeightDiff) {
-      throw new Error("Annual weight diff is not initialised");
+      console.warn("Annual weight diff is not initialised");
+      return null;
     }
     const coefficent =
       currentYearCaloriesData.averageDeficit /
