@@ -1,9 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import React, { ReactElement, useEffect } from "react";
-import axios from "axios";
-import Router from "next/router";
-import { logError } from "../tools/log-error";
 import { DeficitProvider, useDeficit } from "../src/contexts/useDeficit";
 import {
   Table,
@@ -17,18 +14,11 @@ import {
 import {
   useWeeklyCaloriesRemaining,
   WeeklyCaloriesRemainingProvider,
-  getInitialData as getIntialWeeklyCaloriesRemainingData,
+  getInitialData as getInitalWeeklyCaloriesRemainingData,
 } from "../src/contexts/useWeeklyCaloriesRemaining";
 import { CaloriesProvider, useCalories } from "../src/contexts/useCalories";
 import { useWeight, WeightProvider } from "../src/contexts/useWeight";
 const getConfig = () => ({
-  urls: {
-    deficit: process.env.NEXT_PUBLIC_DEFICIT_URL || "",
-  },
-  fitbit: {
-    clientId: process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID || "",
-    redirectUri: process.env.NEXT_PUBLIC_FITBIT_REDIRECT_URI,
-  },
   goal: process.env.NEXT_PUBLIC_GOAL || "2000",
 });
 const config = getConfig();
@@ -47,41 +37,14 @@ function Home(): ReactElement {
   } = useWeeklyCaloriesRemaining();
 
   useEffect(() => {
-    const getDeficit = async () => {
-      if (state.error) {
-        if (
-          axios.isAxiosError(state.error) &&
-          state.error.response?.status === 401
-        ) {
-          Router.push(
-            `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${config.fitbit.clientId}&scope=activity%20nutrition%20weight&redirect_uri=${config.fitbit.redirectUri}`
-          );
-        } else {
-          logError(`${state.error}`);
-        }
-      }
-    };
-
     const getWeeklyCaloriesRemaining = async () => {
-      if (weeklyCaloriesRemainingState.error) {
-        if (
-          axios.isAxiosError(weeklyCaloriesRemainingState.error) &&
-          weeklyCaloriesRemainingState.error.response?.status === 401
-        ) {
-          Router.push(
-            `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${config.fitbit.clientId}&scope=activity%20nutrition%20weight&redirect_uri=${config.fitbit.redirectUri}`
-          );
-        } else {
-          logError(`${weeklyCaloriesRemainingState.error}`);
-        }
-      } else if (!weeklyCaloriesRemainingState.averageCaloriesThisWeek) {
-        await getIntialWeeklyCaloriesRemainingData(
+      if (!weeklyCaloriesRemainingState.averageCaloriesThisWeek) {
+        await getInitalWeeklyCaloriesRemainingData(
           dispatchWeeklyCaloriesRemaining,
           goal
         );
       }
     };
-    getDeficit();
     getWeeklyCaloriesRemaining();
   }, [
     dispatch,
@@ -91,6 +54,7 @@ function Home(): ReactElement {
     state.weight,
     state.deficit,
     weeklyCaloriesRemainingState,
+    goal,
   ]);
 
   return (

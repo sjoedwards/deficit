@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { ReactElement, useEffect, useReducer } from "react";
 import { getWeeklyCalories } from "../../services/calories";
 import { FitbitDailyCaloriesData, FitbitWeeklyCaloriesData } from "../../types";
 import { stubbedCalories } from "../../__tests__/utils/stubs";
+import { useFitbit } from "./useFitbit";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -85,6 +85,7 @@ const CaloriesProvider = ({
 }: {
   children: ReactElement;
 }): ReactElement => {
+  const { fitbitClient } = useFitbit();
   const [caloriesState, dispatch] = useReducer(
     caloriesReducer,
     initialCaloriesState
@@ -97,8 +98,11 @@ const CaloriesProvider = ({
       const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
       const dailyCalories = stubbed
         ? stubbedCalories
-        : (await axios.get<FitbitDailyCaloriesData[]>("/api/calories/daily"))
-            .data;
+        : (
+            await fitbitClient.get<FitbitDailyCaloriesData[]>(
+              "/api/calories/daily"
+            )
+          )?.data;
       const weeklyCalories = getWeeklyCalories(dailyCalories);
       dispatch({
         type: EActionKind.UPDATE_SUCCESS,
@@ -106,7 +110,7 @@ const CaloriesProvider = ({
       });
     };
     fetchCalories();
-  }, []);
+  }, [fitbitClient]);
   return (
     <CaloriesContext.Provider value={value}>
       {children}

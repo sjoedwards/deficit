@@ -1,6 +1,7 @@
 import React from "react";
 import Home from "../../pages/index";
 import { act, render, screen, within } from "@testing-library/react";
+import { FitbitProvider } from "../../src/contexts/useFitbit";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 import { calorieMock } from "./api/mocks/frontend/calories/calories-mock";
@@ -25,9 +26,11 @@ afterEach(() => {
   calMockservice.get().resetHistory();
 });
 
+const customRender = () => render(<Home />, { wrapper: FitbitProvider });
+
 describe("Home Page", () => {
   it("Renders Deficit after initial load", async () => {
-    render(<Home />);
+    customRender();
     act(() => {
       jest.advanceTimersByTime(5000);
     });

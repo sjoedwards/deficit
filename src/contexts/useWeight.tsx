@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { ReactElement, useEffect, useReducer } from "react";
 import { getWeeklyWeight } from "../../services/weight";
 import { FitbitDailyWeightData, FitbitWeeklyWeightData } from "../../types";
 import { stubbedWeight } from "../../__tests__/utils/stubs";
+import { useFitbit } from "./useFitbit";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -87,6 +87,8 @@ const WeightProvider = ({
   const [weightState, dispatch] = useReducer(weightReducer, initialWeightState);
   const value = { state: weightState, dispatch };
 
+  const { fitbitClient } = useFitbit();
+
   useEffect(() => {
     const fetchWeight = async () => {
       dispatch({ type: EActionKind.UPDATE_START });
@@ -98,7 +100,8 @@ const WeightProvider = ({
 
       const dailyWeights = stubbed
         ? stubbedWeight
-        : (await axios.get<FitbitDailyWeightData[]>("/api/weight/daily")).data;
+        : (await fitbitClient.get<FitbitDailyWeightData[]>("/api/weight/daily"))
+            ?.data;
 
       const weeklyWeights = await getWeeklyWeight(dailyWeights);
 
