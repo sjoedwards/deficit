@@ -51,6 +51,7 @@ const FitbitProvider = ({
         } else {
           logError(error);
         }
+        return;
       }
     );
   }, []);
