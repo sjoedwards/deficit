@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect, useReducer } from "react";
 import { getWeeklyWeight } from "../../services/weight";
 import { FitbitDailyWeightData, FitbitWeeklyWeightData } from "../../types";
-import { stubbedWeight } from "../../__tests__/utils/stubs";
 import { useFitbit } from "./useFitbit";
 
 enum EStatus {
@@ -92,16 +91,14 @@ const WeightProvider = ({
   useEffect(() => {
     const fetchWeight = async () => {
       dispatch({ type: EActionKind.UPDATE_START });
-      const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
       const roundNumericToDecimalPlaces = (
         value: string,
         decimalPlacesArg: number
       ): string => parseFloat(value).toFixed(decimalPlacesArg);
 
-      const dailyWeights = stubbed
-        ? stubbedWeight
-        : (await fitbitClient.get<FitbitDailyWeightData[]>("/api/weight/daily"))
-            ?.data;
+      const dailyWeights = (
+        await fitbitClient.get<FitbitDailyWeightData[]>("/api/weight/daily")
+      )?.data;
 
       const weeklyWeights = await getWeeklyWeight(dailyWeights);
 

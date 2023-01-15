@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect, useReducer } from "react";
 import { getWeeklyCalories } from "../../services/calories";
 import { FitbitDailyCaloriesData, FitbitWeeklyCaloriesData } from "../../types";
-import { stubbedCalories } from "../../__tests__/utils/stubs";
 import { useFitbit } from "./useFitbit";
 
 enum EStatus {
@@ -95,14 +94,9 @@ const CaloriesProvider = ({
   useEffect(() => {
     const fetchCalories = async () => {
       dispatch({ type: EActionKind.UPDATE_START });
-      const stubbed = process.env.NEXT_PUBLIC_STUBBED === "true";
-      const dailyCalories = stubbed
-        ? stubbedCalories
-        : (
-            await fitbitClient.get<FitbitDailyCaloriesData[]>(
-              "/api/calories/daily"
-            )
-          )?.data;
+      const dailyCalories = (
+        await fitbitClient.get<FitbitDailyCaloriesData[]>("/api/calories/daily")
+      )?.data;
       const weeklyCalories = getWeeklyCalories(dailyCalories);
       dispatch({
         type: EActionKind.UPDATE_SUCCESS,

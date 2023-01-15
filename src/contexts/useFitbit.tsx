@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import React, { ReactElement, useMemo } from "react";
 import { logError } from "../../tools/log-error";
 import Router from "next/router";
@@ -27,21 +27,29 @@ const FitbitProvider = ({
   children: ReactElement;
 }): ReactElement => {
   useMemo(() => {
+    fitbitClient.interceptors.request.use(function (request) {
+      console.log(`Making request to ${request.url}`);
+      return request;
+    });
     fitbitClient.interceptors.response.use(
       function (response) {
         return response;
       },
       function (error) {
-        console.log(
-          "🚀 ~ file: useFitbit.tsx:35 ~ useMemo ~ error",
-          error.toJSON()
-        );
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
+        const isAxiosError = axios.isAxiosError(error);
+        if (isAxiosError && error.response?.status === 401) {
           Router.push(
             `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${config.fitbit.clientId}&scope=activity%20nutrition%20weight&redirect_uri=${config.fitbit.redirectUri}`
           );
+        }
+        if (isAxiosError) {
+          logError(
+            `Request to ${
+              (error as AxiosError).config.url
+            } resulted in error: ${error.message}`
+          );
         } else {
-          logError(`${error}`);
+          logError(error);
         }
       }
     );

@@ -18,6 +18,7 @@ import {
 } from "../src/contexts/useWeeklyCaloriesRemaining";
 import { CaloriesProvider, useCalories } from "../src/contexts/useCalories";
 import { useWeight, WeightProvider } from "../src/contexts/useWeight";
+import { FitbitProvider } from "../src/contexts/useFitbit";
 const getConfig = () => ({
   goal: process.env.NEXT_PUBLIC_GOAL || "2000",
 });
@@ -338,14 +339,16 @@ function Home(): ReactElement {
 
 export default function HomeWrapper(): ReactElement {
   return (
-    <WeeklyCaloriesRemainingProvider>
-      <CaloriesProvider>
-        <WeightProvider>
-          <DeficitProvider>
-            <Home />
-          </DeficitProvider>
-        </WeightProvider>
-      </CaloriesProvider>
-    </WeeklyCaloriesRemainingProvider>
+    <FitbitProvider>
+      <WeeklyCaloriesRemainingProvider>
+        <CaloriesProvider>
+          <WeightProvider>
+            <DeficitProvider>
+              <Home />
+            </DeficitProvider>
+          </WeightProvider>
+        </CaloriesProvider>
+      </WeeklyCaloriesRemainingProvider>
+    </FitbitProvider>
   );
 }

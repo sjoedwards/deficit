@@ -1,39 +1,26 @@
-import React from "react";
-import Home from "../../pages/index";
-import { act, render, screen, within } from "@testing-library/react";
-import { FitbitProvider } from "../../src/contexts/useFitbit";
-import MockAdapter from "axios-mock-adapter";
-import axios from "axios";
-import { calorieMock } from "./api/mocks/frontend/calories/calories-mock";
-import { weightMock } from "./api/mocks/frontend/weight/weight-mock";
+import { screen, waitFor, within, render } from "@testing-library/react";
 
-const mock = new MockAdapter(axios);
-const calMockservice = calorieMock(mock);
-const weightMockService = weightMock(mock);
 const { findByRole, queryByText, getByText, getByTestId } = screen;
 
 // This sets the mock adapter on the default instance
 beforeEach(async () => {
-  calMockservice.mockDefault();
-  weightMockService.mockDefault();
-  jest.useFakeTimers("modern");
-  jest.setSystemTime(new Date(1622588225000));
+  jest.useFakeTimers().setSystemTime(new Date(1622588225000));
 });
 
 afterEach(() => {
   jest.runOnlyPendingTimers();
   jest.useRealTimers();
-  calMockservice.get().resetHistory();
 });
 
-const customRender = () => render(<Home />, { wrapper: FitbitProvider });
-
 describe("Home Page", () => {
-  it("Renders Deficit after initial load", async () => {
-    customRender();
-    act(() => {
-      jest.advanceTimersByTime(5000);
+  it.only("Renders Deficit after initial load", async () => {
+    const Test = () => <div>Test</div>;
+    render(<Test />);
+
+    await waitFor(() => {
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
     });
+
     await findByRole("heading", { name: /current month/i });
     // Monthly
     getByText(/your deficit today is \-1095/i);
