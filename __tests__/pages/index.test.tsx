@@ -1,20 +1,11 @@
 import React from "react";
 import Home from "../../pages/index";
 import { act, render, screen, within } from "@testing-library/react";
-import MockAdapter from "axios-mock-adapter";
-import axios from "axios";
-import { calorieMock } from "./api/mocks/frontend/calories/calories-mock";
-import { weightMock } from "./api/mocks/frontend/weight/weight-mock";
 
-const mock = new MockAdapter(axios);
-const calMockservice = calorieMock(mock);
-const weightMockService = weightMock(mock);
 const { findByRole, queryByText, getByText, getByTestId } = screen;
 
 // This sets the mock adapter on the default instance
 beforeEach(async () => {
-  calMockservice.mockDefault();
-  weightMockService.mockDefault();
   jest.useFakeTimers("modern");
   jest.setSystemTime(new Date(1622588225000));
 });
@@ -22,14 +13,13 @@ beforeEach(async () => {
 afterEach(() => {
   jest.runOnlyPendingTimers();
   jest.useRealTimers();
-  calMockservice.get().resetHistory();
 });
 
 describe("Home Page", () => {
   it("Renders Deficit after initial load", async () => {
     render(<Home />);
     act(() => {
-      jest.advanceTimersByTime(5000);
+      jest.runAllTimers();
     });
     await findByRole("heading", { name: /current month/i });
     // Monthly
