@@ -19,6 +19,7 @@ const deficitService = async (
   weights: Array<FitbitDailyWeightData>,
   calories: Array<FitbitDailyCaloriesData>
 ): Promise<IDeficitServiceResponse> => {
+  console.log("year 2", new Date().getFullYear());
   const caloriesCurrentQuarter = groupIntoQuarterlyCalories(calories);
 
   const averageDeficitCurrentQuarter = getAverageDeficit(
@@ -34,6 +35,7 @@ const deficitService = async (
   const averageDeficitCurrentMonth = getAverageDeficit(caloriesCurrentMonth);
 
   const goal = -0.25;
+  console.log("year 2.5", new Date().getFullYear());
 
   const {
     combinedValues,
@@ -53,7 +55,7 @@ const deficitService = async (
     weightDiff: weightDiff3Point,
     rSquaredValue: rSquaredValue3Point,
     deficitForRemainingDaysThisMonth:
-      deficitForRemainingDaysThisMonthFixed3Point,
+    deficitForRemainingDaysThisMonthFixed3Point,
   } = (await predictService(
     weights,
     calories,
@@ -64,12 +66,15 @@ const deficitService = async (
       weightDiffMovingAverage: 3,
     }
   )) || {};
+
+  console.log("year 2.75", new Date().getFullYear());
+
   const {
     combinedValues: combinedValues5Point,
     weightDiff: weightDiff5Point,
     rSquaredValue: rSquaredValue5Point,
     deficitForRemainingDaysThisMonth:
-      deficitForRemainingDaysThisMonthFixed5Point,
+    deficitForRemainingDaysThisMonthFixed5Point,
   } = (await predictService(
     weights,
     calories,
@@ -81,17 +86,31 @@ const deficitService = async (
     }
   )) || {};
 
+  console.log("year 2.8", new Date().getFullYear());
+
+  // const {
+  //   combinedValues: combinedValuesQuarter,
+  //   weightDiff: weightDiffQuarter,
+  //   deficitForRemainingDaysThisQuarter,
+  // } = (await predictService(
+  //   weights,
+  //   calories,
+  //   averageDeficitCurrentQuarter,
+  //   "quarterly",
+  //   goal
+  // )) || {};
+
   const {
     combinedValues: combinedValuesQuarter,
     weightDiff: weightDiffQuarter,
     deficitForRemainingDaysThisQuarter,
-  } = (await predictService(
-    weights,
-    calories,
-    averageDeficitCurrentQuarter,
-    "quarterly",
-    goal
-  )) || {};
+  } = {
+    combinedValues: 0,
+    weightDiff: 0,
+    deficitForRemainingDaysThisQuarter: 0,
+  };
+
+  console.log("year 2.9", new Date().getFullYear());
 
   const weightDiffFixed = weightDiff && weightDiff.toFixed(3);
   const deficitForRemainingDaysThisMonthFixed =
@@ -100,6 +119,7 @@ const deficitService = async (
   const weightDiffQuarterFixed = weightDiffQuarter?.toFixed(3);
   const deficitForRemainingDaysThisQuarterFixed =
     deficitForRemainingDaysThisQuarter?.toFixed(0);
+  console.log("year 3", new Date().getFullYear());
 
   // New Annual Engine
   const annualWeightPredictionService = new AnnualWeightPredictionService(

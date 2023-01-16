@@ -143,6 +143,7 @@ const getInitialData = async (
       payload: { averageCaloriesThisWeek, caloriesRemainingPerDay },
     });
   } catch (error) {
+    console.error(error);
     dispatch({ type: EActionKind.UPDATE_FAIL, error });
   }
 };

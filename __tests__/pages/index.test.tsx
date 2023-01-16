@@ -1,10 +1,13 @@
-import { screen, waitFor, within, render } from "@testing-library/react";
+import { screen, within, render, waitFor } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
+import Home from "../../pages/index";
 
 const { findByRole, queryByText, getByText, getByTestId } = screen;
 
 // This sets the mock adapter on the default instance
 beforeEach(async () => {
-  jest.useFakeTimers().setSystemTime(new Date(1622588225000));
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(1622588225000));
 });
 
 afterEach(() => {
@@ -14,8 +17,11 @@ afterEach(() => {
 
 describe("Home Page", () => {
   it.only("Renders Deficit after initial load", async () => {
-    const Test = () => <div>Test</div>;
-    render(<Test />);
+    render(<Home />);
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
 
     await waitFor(() => {
       expect(queryByText("Loading...")).not.toBeInTheDocument();

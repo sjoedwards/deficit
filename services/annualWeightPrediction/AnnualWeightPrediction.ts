@@ -134,6 +134,7 @@ class AnnualWeightPredictionService {
     const currentYearWeightData = this.annualWeightData.find((weightData) =>
       isThisYear(new Date(weightData.year))
     );
+
     const currentYearCaloriesData = this.annualCaloriesData.find((weightData) =>
       isThisYear(new Date(weightData.year))
     );

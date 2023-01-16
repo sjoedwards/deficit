@@ -79,6 +79,8 @@ const DeficitProvider = ({
       }
       dispatch({ type: EActionKind.UPDATE_START });
       try {
+        console.log("year 1", new Date().getFullYear());
+
         const deficit = await deficitService(dailyWeights, dailyCalories);
 
         dispatch({
@@ -86,6 +88,7 @@ const DeficitProvider = ({
           payload: { deficit },
         });
       } catch (error) {
+        console.error(error);
         dispatch({ type: EActionKind.UPDATE_FAIL, error });
       }
     };
